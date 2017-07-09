@@ -1,5 +1,5 @@
 # Test-Konfigurationsdatei
-WetterwarnungDownloader/config.inc.php
+config.local.php
 
 # Temporär-Ordner für Tests
 tmp/
