@@ -1,0 +1,15 @@
+language: php
+php:
+  - '5.6'
+  - '7.0'
+  - '7.1'
+before_script:
+  - composer self-update
+  - composer update
+script:
+  - "./vendor/bin/phpcs genRegenRadar.php botLib/* --extensions=php --standard=PSR1"
+  - "./vendor/bin/phpmd genRegenRadar.php,config.sample.php,botLib/Toolbox.php text cleancode,codesize,controversial,design,naming,unusedcode"
+cache:
+  directories:
+    - $HOME/.composer/cache/files
+    

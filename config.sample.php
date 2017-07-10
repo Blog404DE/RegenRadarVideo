@@ -34,7 +34,7 @@ $ftp["password"]    = "********";
 $converter["video"] = "/usr/bin/ffmpeg";
 $converter["gif"]   = "/usr/bin/convert";
 
-// Zu bearbeitende DWD-Radar-Daten:
+// Zu bearbeitende DWD-Radar-Daten
 $config = array();
 $config[] = [
     "remoteFolder"  => "/gds/gds/specials/radar/southwest",

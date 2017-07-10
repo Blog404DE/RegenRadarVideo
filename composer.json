@@ -1,0 +1,27 @@
+{
+  "name": "Blog404DE/regenradarvideo",
+  "description": "Registration info to admin",
+  "keywords": [
+    "DWD",
+    "Regenradar",
+    "Satellitenbild"
+  ],
+  "type": "project",
+  "homepage": "https://github.com/Blog404DE/RegenRadarVideo",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Jens Dutzi",
+      "email": "info@tf-network.de",
+      "homepage": "https://www.tf-network.de",
+      "role": "Developer"
+    }
+  ],
+  "support": {
+    "issues": "https://github.com/Blog404DE/RegenRadarVideo/issues"
+  },
+  "require-dev": {
+    "squizlabs/PHP_CodeSniffer":    "@stable",
+    "phpmd/phpmd" : "@stable"
+  }
+}

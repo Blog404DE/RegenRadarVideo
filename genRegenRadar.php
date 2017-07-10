@@ -85,7 +85,8 @@ try {
                     echo("-> Erzeugen des " . $filetype . "-Videos in der Konfiguration deaktiviert" . PHP_EOL);
                 } else {
                     prepaireRadarVideo($value, $arrDownloadList, $filetype);
-                    createRadarVideo($filename, $filetype, $converter, $value);
+                    $tmpRegenAnimation = createRadarVideo($filetype, $converter, $value);
+                    saveRadarVideo($tmpRegenAnimation, $filename);
                 }
             }
         }

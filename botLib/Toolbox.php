@@ -154,6 +154,8 @@ function connectToFtp($ftp)
     }
 
     // Login mit Benutzername und Passwort
+    echo "Verbinde zu " .$ftp["host"] . " mit Benutzername " .$ftp["username"] . PHP_EOL;
+
     $loginResult = @ftp_login($ftpConnId, $ftp["username"], $ftp["password"]);
     ftp_pasv($ftpConnId, true);
 
@@ -162,8 +164,6 @@ function connectToFtp($ftp)
         throw new Exception(
             "Verbindungsaufbau zu zu " . $ftp["host"] . " mit Benutzername " . $ftp["username"] . " fehlgeschlagen."
         );
-    } else {
-        echo "Verbunden zu " .$ftp["host"] . " mit Benutzername " .$ftp["username"] . PHP_EOL;
     }
 
     return $ftpConnId;
@@ -180,11 +180,12 @@ function connectToFtp($ftp)
 function getFileList($ftpConnId, $currentConfig)
 {
     // Versuche, in das benötigte Verzeichnis zu wechseln
-    if (ftp_chdir($ftpConnId, $currentConfig["remoteFolder"])) {
+    if (!ftp_chdir($ftpConnId, $currentConfig["remoteFolder"])) {
         echo "Aktuelles Verzeichnis: " . ftp_pwd($ftpConnId)  . PHP_EOL;
-    } else {
         throw new Exception("Verzeichniswechsel ist fehlgeschlagen");
     }
+    echo "Aktuelles Verzeichnis: " . ftp_pwd($ftpConnId)  . PHP_EOL;
+
 
     // Verzeichnisliste auslesen und sortieren
     $arrFTPContent = ftp_nlist($ftpConnId, ".");
@@ -227,37 +228,44 @@ function getFileList($ftpConnId, $currentConfig)
  * @param $currentConfig
  * @param $arrDownloadList
  * @return bool
+ * @throws
  */
 function downloadRadarImages($ftpConnId, $currentConfig, $arrDownloadList)
 {
     // Beginne Download
-    echo(PHP_EOL . "Starte den Download von " . count($arrDownloadList) . " Radar-Dateien" . PHP_EOL);
+    echo(PHP_EOL . "Starte den Download neuer Radar-Dateien von " . count($arrDownloadList) . " Radarbilder" . PHP_EOL);
 
     $needRebuild = false;
+    $filecount = 0;
     foreach ($arrDownloadList as $filename => $filetime) {
         $localFile = $currentConfig["localFolder"] . "/" . $filename;
 
         if (!file_exists($localFile)) {
+            $needRebuild = true;
+
             // Öffne lokale Datei
             $handle = fopen($localFile, 'w');
 
-            if (ftp_fget($ftpConnId, $handle, $filename, FTP_BINARY, 0)) {
-                echo "-> Datei " . $localFile . " (" .
+            echo "-> Datei " . $localFile . " (" .
+                date("d.m.Y H:i", $filetime) .
+                ") wird heruntergeladen." . PHP_EOL;
+
+            if (!ftp_fget($ftpConnId, $handle, $filename, FTP_BINARY, 0)) {
+                throw new Exception(
+                    "Datei: " . $filename . " (" .
                     date("d.m.Y H:i", $filetime) .
-                    ") wurde erfolgreich heruntergeladen." . PHP_EOL;
-                $needRebuild = true;
-            } else {
-                echo "-> Datei " . $filename . " (" .
-                    date("d.m.Y H:i", $filetime) .
-                    ") Download ist fehlgeschlagen. " . PHP_EOL;
+                    ") Download ist fehlgeschlagen"
+                );
             }
+
+            $filecount++;
 
             // Schließe Datei-Handle
             fclose($handle);
-        } else {
-            echo "-> Datei " . $localFile . " existiert bereits und muss nicht neu geladen werden" . PHP_EOL;
         }
     }
+
+    echo("-> Download " . $filecount . " neuer erfolgreich abgeschlossen" . PHP_EOL);
 
     return $needRebuild;
 }
@@ -274,6 +282,7 @@ function cleanDownloadFolder($currentConfig, $arrDownloadList)
     // Symlink-Verzeichnis leeren
     echo(PHP_EOL . "Setze Symlink-Verzeichnis zurück" . PHP_EOL);
     array_map('unlink', glob($currentConfig["localFolder"] . "/frames/frame*.jpg"));
+    echo("-> Symlinks erfolgreich zurückgesetzt" . PHP_EOL);
 
     // Entferne veraltete Dateien aus dem Download-Verzeichnis
     echo(PHP_EOL . "Führe Bereinigung durch:" . PHP_EOL);
@@ -282,24 +291,29 @@ function cleanDownloadFolder($currentConfig, $arrDownloadList)
 
     if ($arrLocalFiles === false) {
         throw new Exception("Fehler beim bereinigen der alten Dateien - generiere daher keine neue Regen-Animation");
-    } else {
-        // Ermittle Dateien die nicht mehr benötigt werden
-        $arrOldFiles = array_diff(
-            $arrLocalFiles,
-            array_map(function ($item) use ($currentConfig) {
-                return $currentConfig["localFolder"] . "/" . $item;
-            }, array_keys($arrDownloadList))
-        );
+    }
 
-        // Lösche Dateien
-        if (count($arrOldFiles) > 0) {
-            foreach ($arrOldFiles as $delFile) {
+    // Ermittle Dateien die nicht mehr benötigt werden
+    $arrOldFiles = array_diff(
+        $arrLocalFiles,
+        array_map(function ($item) use ($currentConfig) {
+            return $currentConfig["localFolder"] . "/" . $item;
+        }, array_keys($arrDownloadList))
+    );
+
+    // Lösche Dateien
+    if (count($arrOldFiles) > 0) {
+        array_map(
+            function ($delFile) {
+                @unlink($delFile);
                 echo "Lösche veraltete Datei: " . $delFile . PHP_EOL;
-                unlink($delFile);
-            }
-        } else {
-            echo "Keine Dateien zum bereinigen gefunden" . PHP_EOL;
-        }
+            },
+            $arrOldFiles
+        );
+    }
+
+    if (count($arrOldFiles) == 0) {
+        echo "Keine Dateien zum bereinigen gefunden" . PHP_EOL;
     }
 }
 
@@ -314,46 +328,49 @@ function cleanDownloadFolder($currentConfig, $arrDownloadList)
 function prepaireRadarVideo($currentConfig, $arrDownloadList, $filetype)
 {
     // Symlinks neu erzeugen
-    echo(PHP_EOL . "Erzeuge Symlinks für das erstellen des " . $filetype . "-Video" . PHP_EOL);
     $revDownloadList = array_reverse($arrDownloadList, true);
     $filenr = 0;
+
+    echo(PHP_EOL . "Erzeuge " . count($revDownloadList) . " Symlinks für die einzelnen Video-Frames" . PHP_EOL);
     foreach (array_keys($revDownloadList) as $filename) {
         $symlink = $currentConfig["localFolder"] . "/frames/frame" . str_pad($filenr, 3, "0", STR_PAD_LEFT) . ".jpg";
-        echo("-> Symlink: " . $filename . " auf " . $symlink . PHP_EOL);
-
-        if (!is_link($symlink)) {
-            symlink("../" . $filename, $symlink);
-        } else {
-            unlink($symlink);
-            symlink("../" . $filename, $symlink);
+        if (is_link($symlink)) {
+            if (!unlink($symlink)) {
+                throw new Exception("Löschen des Symlink " . $symlink . " fehlgeschlagen");
+            }
         }
+
+        if (!symlink("../" . $filename, $symlink)) {
+            throw new Exception("Erzeugen des Symlink " . $symlink . " fehlgeschlagen");
+        };
 
         $filenr++;
     }
+    echo("-> Symlinks erfolgreich erzeugt" . PHP_EOL);
 
     // Poster-File kopieren
     if (!empty($currentConfig["posterFile"]) && $currentConfig["posterFile"] !== false) {
         reset($revDownloadList);
         $lastImage = $currentConfig["localFolder"] . "/" . key($revDownloadList);
         echo(PHP_EOL);
-        echo( "-> Kopiere Poster-File " . key($revDownloadList) . " für " . $filetype . "-Videos in Ziel-Ordner");
-        echo(PHP_EOL);
+        echo("Kopiere Poster-File " . key($revDownloadList) . " für " . $filetype . "-Videos in Ziel-Ordner" . PHP_EOL);
         if (!copy($lastImage, $currentConfig["posterFile"])) {
             throw new Exception("Kopieren des Poster-File " . key($revDownloadList) . " fehlgeschlagen");
         }
+        echo("-> Datei erfolgreich kopiert" . PHP_EOL);
     }
 }
 
 /**
  * Erzeuge Video aus Radar-Bilder
  *
- * @param $filename
  * @param $filetype
  * @param $converter
  * @param $config
+ * @return string
  * @throws Exception
  */
-function createRadarVideo($filename, $filetype, $converter, $config)
+function createRadarVideo($filetype, $converter, $config)
 {
     echo(PHP_EOL . "Starte kompilieren des des " . $filetype . "-Video" . PHP_EOL);
     echo("-> Dieser Vorgang kann einige Zeit dauern ... " . PHP_EOL);
@@ -370,9 +387,9 @@ function createRadarVideo($filename, $filetype, $converter, $config)
             }
             $cmd = $converter["video"] .
                 " -loglevel error -hide_banner -nostats -y -framerate 2/1 " .
-                "-i \"" . $config["localFolder"] . "/frames/frame%03d.jpg\" " .
+                "-i " . escapeshellarg($config["localFolder"] . "/frames/frame%03d.jpg") . " " .
                 "-c:v libvpx -r 30 -an -b:v 600k -pix_fmt yuv420p -f webm " .
-                $tmpRegenAnimation;
+                escapeshellarg($tmpRegenAnimation);
             break;
         case "mp4":
             if ($converter["video"] == false) {
@@ -380,9 +397,9 @@ function createRadarVideo($filename, $filetype, $converter, $config)
             }
             $cmd = $converter["video"] .
                 " -loglevel error -hide_banner -nostats -y -framerate 2/1 " .
-                "-i \"" . $config["localFolder"] . "/frames/frame%03d.jpg\" " .
+                "-i " . escapeshellarg($config["localFolder"] . "/frames/frame%03d.jpg") . " " .
                 "-c:v libx264 -r 30 -an -b:v 600k -pix_fmt yuv420p -f mp4 " .
-                $tmpRegenAnimation;
+                escapeshellarg($tmpRegenAnimation);
             break;
         case "gif":
             if ($converter["gif"] == false) {
@@ -390,18 +407,38 @@ function createRadarVideo($filename, $filetype, $converter, $config)
             }
             $cmd = $converter["gif"] .
                 " -delay 50 -loop 0 " .
-                "\"" . $config["localFolder"] . "/frames/frame*.jpg\" gif:" . $tmpRegenAnimation;
+                escapeshellarg($config["localFolder"] . "/frames/frame*.jpg") . " " . +
+                "gif:" . escapeshellarg($tmpRegenAnimation);
             break;
     }
 
     // Konvertierung durchführen
-    if (!empty($cmd)) {
-        exec($cmd);
-        rename($tmpRegenAnimation, $filename);
-        @unlink($tmpRegenAnimation);
-        chmod($filename, 0644);
-        echo("-> " . $filename . " wurde erzeugt." . PHP_EOL);
-    } else {
-        throw new Exception("Fehler beim anlegen des Konvertierungs-Auftrags");
+    $exitval = exec($cmd, $output);
+
+    // Erzeugte Dateien bereitstellen
+    if (is_null($output) || $exitval != 0) {
+        throw new Exception("Fehler beim ausführen des Konvertierungs-Auftrags");
     }
+
+    return $tmpRegenAnimation;
+}
+
+/**
+ * Kopiere erzeugte Video/Animation
+ *
+ * @param $tmpRegenAnimation
+ * @param $filename
+ * @throws Exception
+ */
+function saveRadarVideo($tmpRegenAnimation, $filename)
+{
+    if (!rename($tmpRegenAnimation, $filename)) {
+        throw new Exception("Fehler beim verschieben des erzeugten Videos");
+    }
+
+    if (!chmod($filename, 0644)) {
+        throw new Exception("Fehler beim setzen der Datei-Rechte für das erzeugten Videos");
+    };
+
+    echo("-> " . $filename . " wurde erzeugt." . PHP_EOL);
 }

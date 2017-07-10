@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/Blog404DE/RegenRadarVideo.svg?branch=develop)](https://travis-ci.org/Blog404DE/RegenRadarVideo)
+
 # Regen-Radar Script
 
 ## Einleitung
@@ -103,16 +105,16 @@ $config[] = array(	"remoteFolder"  => "/gds/gds/specials/radar",
 	```bash
 	#!/bin/bash
 	LOCKFILE=/tmp/$(whoami)_$(basename $0).lock
-	[ -f $LOCKFILE ] && { echo "$(basename $0) läuft schon"; exit 1; }
+	[ -f ${LOCKFILE} ] && { echo "$(basename $0) läuft schon"; exit 1; }
 
 	lock_file_loeschen() {
-    	    rm -f $LOCKFILE
+    	    rm -f ${LOCKFILE}
 	}
 
 	trap "lock_file_loeschen ; exit 1" 2 9 15
 
 	# Lock-Datei anlegen
-	echo $$ > $LOCKFILE
+	echo $$ > ${LOCKFILE}
 
 
 	# Starte Script
