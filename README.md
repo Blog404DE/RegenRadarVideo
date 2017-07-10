@@ -2,6 +2,9 @@
 
 # Regen-Radar Script
 
+> **Wichtige Änderung:** Die Konfigurations-Datei der aktuellste Version des Wetterwarnung Downloader ist nicht kompatibel zur Konfigurations-Datei der bisherigen Version 1.x. Weitere Informationen hierzu finden Sie hier in der README.md. 
+
+
 ## Einleitung
 
 Das Regenradar-Script dient zum erstellen von Videos bzw. animierten GIF-Dateien anhand der vom Deutschen Wetterdienst im Rahmen der Grundversorgung angebotenen Regenradar-Bilder für ganz Deutschland bzw. einzelnen Regionen innerhalb von Deutschland. Details zur Grundversorgung finden sich auf der [NeuthardWetterScripts Hauptseite](https://github.com/Blog404DE/NeuthardWetterScripts).
@@ -11,8 +14,8 @@ Das Regenradar-Script dient zum erstellen von Videos bzw. animierten GIF-Dateien
 ### Vorraussetzungen:
 
 - Linux (unter Debian getestet)
-- PHP 5.5 (oder neuer) mit FTP-Modul einkompiliert
-- libav-tools oder ffmpeg installiert (für mp4/webm-Videos)
+- PHP 5.6 (oder neuer) mit aktiviertem FTP-Modul
+- ffmpeg oder libav-tools installiert (für mp4/webm-Videos)
 - Imagemagick (für animierte gif-datei)
 - Shell-Zugriff zum einrichten eines Cronjob
 
@@ -22,20 +25,23 @@ Das Regenradar-Script dient zum erstellen von Videos bzw. animierten GIF-Dateien
 
 	Debian/Ubuntu/Mint:
 	
-	```sh
+	```bash
 	apt-get update
-	apt-get install imagemagick libav-tools
+	apt-get install imagemagick ffmpeg
 	```
+	Sollten Sie eine Meldung bekommen, dass ffmpeg nicht verfügbar ist (bei Debian Jessie / old-stable) können Sie stattdessen ffmpeg-Fork *libav-tools* verwenden.
 
 	RHEL/CentOS/Fedora
 	
-	```sh
+	```bash
 	yum install ImageMagick ffmpeg
 	```
 
-### Konfiguration:
+### Konfiguration *(neu)*:
 
-Damit das Script die Regenradar-Videos erzeugt, muss dieses konfiguriert werden. Die Konfigurationsparameter sehen wie folgt aus:
+Bei dem eigentlichen Script zum abrufen der Wetter-Warnungen handelt es sich um die Datei ```genRegenRadar.php```. Das Script selber wird gesteuert über die ```config.local.php``` Datei. Um diese Datei anzulegen, kopieren Sie bitte ```config.sample.php``` und nennen die neue Datei ```config.local.php```.
+
+Die anzupassenden Konfigurationsparameter in der *config.local.php* lauten wie folgt:
 
 1. FTP Zugangsdaten für den Zugriff auf den DWD FTP Server.
 
@@ -57,7 +63,8 @@ Damit das Script die Regenradar-Videos erzeugt, muss dieses konfiguriert werden.
 	```	
 
 	Für ```$converter["video"]``` benötigt man den Pfad zur libav-tool oder ffmpeg Binary. Dies wird benötigt zum erstellen der webm/mp4-Videos.
-	```$converter["gif"]```benötigt den Pfad zum convert-Tool aus dem Imagemagick-Paket. Diese Binary dient zum erstellen der animierten GIF-Datei.
+	
+	```$converter["gif"]``` benötigt den Pfad zum convert-Tool aus dem Imagemagick-Paket. Diese Binary dient zum erstellen der animierten GIF-Datei.
 	
 	Möchte man z.B. keine animierte GIF Datei erzeugen, so empfiehlt sich anstatt des Pfad *false* als Wert zu hinterlegen: 
 	```$converter["gif"] = false;```
@@ -67,7 +74,7 @@ Damit das Script die Regenradar-Videos erzeugt, muss dieses konfiguriert werden.
 	```php
 $config[] = array(	"remoteFolder"  => "/gds/gds/specials/radar",
                   		"localFolder"   => "/srv/webspacepfad/radarDaten/de",
-						"frames"        => "30",
+						"runtimeHour"   => 4,
 						"output"        => array(	"webm" => "/srv/webspacepfad/htdocs/img/regenradar_de.webm",
                                            			"mp4"  => "/srv/webspacepfad/htdocs/img/regenradar_de.mp4",
 													"gif"  => "/srv/webspacepfad/htdocs/img/regenradar_det.gif"),
@@ -79,7 +86,7 @@ $config[] = array(	"remoteFolder"  => "/gds/gds/specials/radar",
 	
 	Als Gegenstück zum Pfad auf dem FTP Server dient ```"localFolder"```. Dieser Array-Wert beinhaltet ein lokaler Ordner, in dem die benötigten einzelnen Radar-Bilder durch das Script gespeichert werden. 
 	
-	Mit dem Array-Wert ```"frames"``` wird hinterlegt aus wievielen Einzelbilder die erzeugten Videos bestehen sollen. Als praktischer Wert hat sich 30 Einzelbilder herausgestellt. Dies deckt, bei Einzelbilder alle 5 Minuten durch den DWD, einen Zeitraum von 150 Minuten bzw. 2 1/2h ab. Abhängig von der Anzahl der Frames verändert sich die Laufzeit des Cronjobs. Um eine zu hohe Belastung des DWD FTP Server zu verhindern, werden maximal die Bilder der letzten 3h zur Verarbeitung herangezogen. Dieser Grenzwert ist hart im Script einprogrammiert. 
+	Mit dem Array-Wert ```"runtimeHour"``` wird hinterlegt, wieviele Stunden das Radar-Video zurück gehen soll. Erzeugt man zum Beispiel das Radar-Video um 18:15 und gibt als ```runtimeHour``` *4* Stunden an, dann werden für das Video die Radar-Bilder von 14:00 Uhr bis 18:15 verwendet. Der Start-Zeitpunkt ist dabei aktuell immer die jeweilige volle Stunde (noch).
 	
 	```"output"``` ist der Dreh- und Angelpunkt für das erstellen der Videos und beinhaltet ein Array welches einerseits beinhaltet für welches Format (webm, mp4, gif) die Videos erzeugt werden sollen und den Ziel-Pfad in dem die Datei jeweils gespeichert werden soll. Im Beispiel werden die Videos in allen 3 verfügbaren Formate erstellt. Falls Sie z.B. die animierte GIF Datei nicht benötigen hinterlegen Sie anstatt des Zielpfad einfach *false*.
 	
@@ -135,5 +142,5 @@ $config[] = array(	"remoteFolder"  => "/gds/gds/specials/radar",
 --
 ##### Lizenz-Information:
 
-Copyright Jens Dutzi 2015 / Stand: 04.11.2015 / Dieses Werk ist lizenziert unter einer [MIT Lizenz](http://opensource.org/licenses/mit-license.php)
+Copyright Jens Dutzi 2015-2017 / Stand: 10.07.2017 / Dieses Werk ist lizenziert unter einer [MIT Lizenz](http://opensource.org/licenses/mit-license.php)
 

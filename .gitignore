@@ -1,5 +1,6 @@
 # Test-Konfigurationsdatei
 config.local.php
+codetest.sh
 
 # Temporär-Ordner für Tests
 tmp/
