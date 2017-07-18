@@ -1,5 +1,9 @@
 # Changelog
 
+2017-07-09, 2.0.3 develop
+---------
+* Der Startzeitpunkt des Videos beginnt nicht mehr nur zwingend um Anfang einer Stunde (sondern zur Aktuellen Uhrzeit - gewünschte Laufzeit in Stunden)
+
 2017-07-09, 2.0.1 develop
 ---------
 * Code-Cleanup und Optimierungen

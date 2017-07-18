@@ -1,8 +1,8 @@
 <?php
 /*
  * DWD-Radar Video Konverter für neuthardwetter.de by Jens Dutzi
- * Version 2.0.1
- * 09.07.2017
+ * Version 2.0.3
+ * 2017-07-18
  * (c) tf-network.de Jens Dutzi 2012-2017
  *
  * Lizenzinformationen (MIT License):
@@ -194,24 +194,16 @@ function getFileList($ftpConnId, $currentConfig)
     }
 
     // Zeit-Filter erzeugen nach GMT/UTC (-> damit nur die Grafiken der letzten x Stunden verarbeitet werden)
-    $searchTime = new DateTime();
-    $searchTime->setTimezone(new DateTimeZone('GMT'));
-    $fileFilter = array($searchTime->format("Ymd_H"));
-    for ($i = 1; $i < $currentConfig["runtimeHour"]; $i++) {
-        $fileFilter[] = $searchTime->modify("-1 hour")->format("Ymd_H");
-    }
+    $startDatum = time() - ($currentConfig["runtimeHour"] * 60 * 60);
 
     echo("Erzeuge Download-Liste:" . PHP_EOL);
     $arrDownloadList = array();
     foreach ($arrFTPContent as $filename) {
-        // Laufe Filter durch
-        foreach ($fileFilter as $filter) {
-            if (strpos($filename, $filter) !== false) {
-                // Übernehme Datei in zu-bearbeiten Liste
-                $fileDate = ftp_mdtm($ftpConnId, $filename);
-                echo("-> " . $filename . " => " . date("d.m.Y H:i", $fileDate) . PHP_EOL);
-                $arrDownloadList[$filename] = $fileDate;
-            }
+        // Prüfe Datum
+        $fileDate = ftp_mdtm($ftpConnId, $filename);
+        if ($fileDate >= $startDatum) {
+            echo("-> " . $filename . " => " . date("d.m.Y H:i", $fileDate) . PHP_EOL);
+            $arrDownloadList[$filename] = $fileDate;
         }
     }
 
