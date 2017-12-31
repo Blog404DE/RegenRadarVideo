@@ -1,8 +1,8 @@
 <?php
 /*
  * DWD-Radar Video Konverter für neuthardwetter.de by Jens Dutzi
- * Version 2.0.3
- * 2017-07-18
+ * Version 3.0.0
+ * 2017-12-29
  * (c) tf-network.de Jens Dutzi 2012-2017
  *
  * Lizenzinformationen (MIT License):
@@ -24,40 +24,35 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// FTP Zugangsdaten:
-$ftp = array();
-$ftp["host"]        = "ftp-outgoing2.dwd.de";
-$ftp["username"]    = "gds*****";
-$ftp["password"]    = "********";
-
 // Pfade zu Konsolenprogramme:
-$converter["video"] = "/usr/bin/ffmpeg";
-$converter["gif"]   = "/usr/bin/convert";
+$converter["video"] = "/usr/local/bin/ffmpeg";
+$converter["gif"]   = "copy";
 
-// Zu bearbeitende DWD-Radar-Daten
+// Zu bearbeitende DWD-Radar-Daten:
 $config = array();
 $config[] = [
-    "remoteFolder"  => "/gds/gds/specials/radar/southwest",
-    "localFolder"   => "srv/webspacepfad/radarDaten/bw",
-    "runtimeHour"   => 4,
-    "output"        => [
-        "webm" => "/srv/webspacepfad/htdocs/img/regenradar_southwest.webm",
-        "mp4"  => "/srv/webspacepfad/htdocs/img/regenradar_southwest.mp4",
-        "gif"  => "/srv/webspacepfad/htdocs/img/regenradar_southwest.gif"
+    "remoteURL"  => "https://www.dwd.de/DWD/wetter/radar/radfilm_baw_akt.gif",
+    "posterURL"  => "https://www.dwd.de/DWD/wetter/radar/rad_baw_akt.jpg",
+    "localFolder"=> "/srv/webspacepfad/tmp/radarDaten/bw",
+    "output"     => [
+        "webm"   => "/srv/webspacepfad/htdocs/img/regenradar_southwest.webm",
+        "mp4"    => "/srv/webspacepfad/htdocs/img/regenradar_southwest.mp4",
+        "gif"    => "/srv/webspacepfad/htdocs/img/regenradar_southwest.gif",
+        "poster" => "/srv/webspacepfad/htdocs/img/regenradar_southwest.jpg",
     ],
-    "posterFile"    => "/srv/webspacepfad/htdocs/img/regenradar_southwest.jpg",
     "forceRebuild"  => false
 ];
 
 $config[] = [
-    "remoteFolder"  => "/gds/gds/specials/radar",
-    "localFolder"   => "/srv/webspacepfad/radarDaten/de",
-    "runtimeHour"   => 4,
-    "output"        => [
+    "remoteURL" => "https://www.dwd.de/DWD/wetter/radar/radfilm_brd_akt.gif",
+    "posterURL" => "https://www.dwd.de/DWD/wetter/radar/rad_brd_akt.jpg",
+    "localFolder"  => "/srv/webspacepfad/tmp/radarDaten/de",
+    "output"       => [
         "webm" => "/srv/webspacepfad/htdocs/img/regenradar_de.webm",
         "mp4"  => "/srv/webspacepfad/htdocs/img/regenradar_de.mp4",
-        "gif"  => "/srv/webspacepfad/htdocs/img/regenradar_det.gif"
+        "gif"  => "/srv/webspacepfad/htdocs/img/regenradar_de.gif",
+        "poster" => "/srv/webspacepfad/htdocs/img/regenradar_southwest.de",
     ],
-    "posterFile"    => "/srv/webspacepfad/htdocs/img/regenradar_de.jpg",
+    "posterFrame"    => 1,
     "forceRebuild"  => false
 ];

@@ -52,51 +52,61 @@ try {
     // Prüfe System
     checkSystem($config, $converter);
 
-    // FTP-Verbindung aufbauen
-    $ftpConnId = connectToFtp($ftp);
-
     // Erzeuge Radar-Videos
     foreach ($config as $value) {
-        $header = "Erzeuge Radar-Video aus dem Verzeichnis " . $value["remoteFolder"];
+        $header = "Beginne mit dem erzeugen des Radar-Video vom DWD Webserver: " . basename($value["remoteURL"]);
         echo(PHP_EOL . $header . PHP_EOL . str_repeat("=", strlen($header)) . PHP_EOL);
 
-        // Dateiliste erzeugen und Dateien herunterladen
-        $arrDownloadList = getFileList($ftpConnId, $value);
-        $needRebuild = downloadRadarImages($ftpConnId, $value, $arrDownloadList);
+        // Lokaler Dateiname für das Download
+        $localVideoFile = $value["localFolder"] . "/" . basename($value["remoteURL"]);
 
-        // Download-Ordner bereinigen
-        cleanDownloadFolder($value, $arrDownloadList);
+        // Prüfe DWD Video nach potentiellen Updates
+        echo("Prüfe ob Update des Videos notwendig ist:" . PHP_EOL);
+        if (file_exists($localVideoFile) && !$value["forceRebuild"]) {
+            $needRebuild = checkDWDRadarVideoForUpdate($localVideoFile, $value["remoteURL"]);
+        } elseif ($value["forceRebuild"]) {
+            echo("-> Update des Videos ist wurde erzwungen durch die Konfigurationsdatei" . PHP_EOL);
+            $needRebuild = true;
+        } else {
+            echo("-> Update des Videos ist notwendig, da noch keine lokale Datei existiert" . PHP_EOL);
+            $needRebuild = true;
+        }
 
-        // Erzeuge die Videos
-        foreach ($value["output"] as $filetype => $filename) {
-            if ($value["forceRebuild"]) {
-                $needRebuild = true;
-            } elseif (!empty($filename) || $filename !== false) {
-                if (!file_exists($filename)) {
-                    $needRebuild = true;
-                }
-            }
+        if (is_null($needRebuild)) {
+            throw new Exception(
+                "Ermitteln des Zeitpunkt des letzten Updates " .
+                "für das Radar-Videos " . basename($localVideoFile) . " fehlgeschlagen"
+            );
+        } elseif ($needRebuild) {
+            // Download des Radar-Videos
+            downloadRadarFile($localVideoFile, $value["remoteURL"]);
 
-
-            if ($needRebuild) {
-                $header = "Erzeuge " . $filetype . " aus den Radar-Daten";
-                echo(PHP_EOL . $header . PHP_EOL . str_repeat("=", strlen($header)) . PHP_EOL);
-                if (empty($filename) || $filename === false) {
-                    echo("-> Erzeugen des " . $filetype . "-Videos in der Konfiguration deaktiviert" . PHP_EOL);
+            // Erzeuge die Videos
+            foreach ($value["output"] as $filetype => $filename) {
+                if ($filetype !== "poster") {
+                    $header = "Erzeuge " . $filetype . " aus den Radar-Daten";
+                    echo(PHP_EOL . $header . PHP_EOL . str_repeat("=", strlen($header)) . PHP_EOL);
+                    if (empty($filename) || $filename === false) {
+                        echo("-> Erzeugen des " . $filetype . "-Videos in der Konfiguration deaktiviert" . PHP_EOL);
+                    } else {
+                        $tmpRegenAnimation = createRadarVideo($filetype, $converter, $value);
+                        saveRadarVideo($tmpRegenAnimation, $filename);
+                    }
                 } else {
-                    prepaireRadarVideo($value, $arrDownloadList, $filetype);
-                    $tmpRegenAnimation = createRadarVideo($filetype, $converter, $value);
-                    saveRadarVideo($tmpRegenAnimation, $filename);
+                    $header = "Lade Poster-Datei für das Video vom DWD Webserver";
+                    echo(PHP_EOL . $header . PHP_EOL . str_repeat("=", strlen($header)) . PHP_EOL);
+
+                    if ($value["posterURL"] === false) {
+                        echo(PHP_EOL . "-> Download der Poster-Datei wird nicht benötigt" . PHP_EOL);
+                    } else {
+                        downloadPosterFile($filename, $value["posterURL"]);
+                    }
                 }
             }
         }
 
-        // createRadarVideo($ftpConnId, $value, $converter);
         echo(PHP_EOL . "... Auftrag ausgeführt!". PHP_EOL . PHP_EOL);
     }
-
-    // FTP Verbindung beenden
-    ftp_close($ftpConnId);
 } catch (Exception $e) {
     // Fehler-Handling
     fwrite(STDERR, "Fataler Fehler: " . $e->getFile() . ":" . $e->getLine() . " - " . $e->getMessage());

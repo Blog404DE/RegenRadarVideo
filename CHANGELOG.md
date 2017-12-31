@@ -1,5 +1,13 @@
 # Changelog
 
+2017-12-29, 3.0.0 develop
+---------
+
+* Komplette Umstellung des Scripts auf eine alternative Download-Methode, nachdem der DWD den Grundversorgungs-Server 
+demnächst schließen wird und im Rahmen der OpenData-Programm die einzelnen Radar-Bilder nicht mehr zur Verfügung stehen
+* Überarbeitete Konfigurationsdatei - *unbedingt beachten!*
+* Neue Systemvorrausetzungen (libCurl Support für PHP)
+
 2017-07-09, 2.0.3 develop
 ---------
 * Der Startzeitpunkt des Videos beginnt nicht mehr nur zwingend um Anfang einer Stunde (sondern zur Aktuellen Uhrzeit - gewünschte Laufzeit in Stunden)

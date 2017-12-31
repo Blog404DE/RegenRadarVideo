@@ -2,7 +2,7 @@
 
 # Regen-Radar Script
 
-> **Wichtige Änderung:** Die Konfigurations-Datei der aktuellste Version des Wetterwarnung Downloader ist nicht kompatibel zur Konfigurations-Datei der bisherigen Version 1.x. Weitere Informationen hierzu finden Sie hier in der README.md. 
+> **Wichtige Änderung:** Die Konfigurations-Datei der aktuellste Version des Wetterwarnung Downloader ist nicht kompatibel zur Konfigurations-Datei der bisherigen Version 2.x. Weitere Informationen hierzu finden Sie hier in der README.md. 
 
 
 ## Einleitung
@@ -14,9 +14,8 @@ Das Regenradar-Script dient zum erstellen von Videos bzw. animierten GIF-Dateien
 ### Vorraussetzungen:
 
 - Linux (unter Debian getestet)
-- PHP 5.6 (oder neuer) mit aktiviertem FTP-Modul
+- PHP 5.6 (oder neuer) mit aktiviertem curl-Modul
 - ffmpeg oder libav-tools installiert (für mp4/webm-Videos)
-- Imagemagick (für animierte gif-datei)
 - Shell-Zugriff zum einrichten eines Cronjob
 
 ### Vorbereitung:
@@ -27,14 +26,14 @@ Das Regenradar-Script dient zum erstellen von Videos bzw. animierten GIF-Dateien
 	
 	```bash
 	apt-get update
-	apt-get install imagemagick ffmpeg
+	apt-get install ffmpeg
 	```
 	Sollten Sie eine Meldung bekommen, dass ffmpeg nicht verfügbar ist (bei Debian Jessie / old-stable) können Sie stattdessen ffmpeg-Fork *libav-tools* verwenden.
 
 	RHEL/CentOS/Fedora
 	
 	```bash
-	yum install ImageMagick ffmpeg
+	yum install ffmpeg
 	```
 
 ### Konfiguration *(neu)*:
@@ -43,54 +42,44 @@ Bei dem eigentlichen Script zum abrufen der Wetter-Warnungen handelt es sich um 
 
 Die anzupassenden Konfigurationsparameter in der *config.local.php* lauten wie folgt:
 
-1. FTP Zugangsdaten für den Zugriff auf den DWD FTP Server.
-
-	```php
-	// FTP Zugangsdaten:
-	$ftp["host"]        = "ftp-outgoing2.dwd.de";
-	$ftp["username"]    = "gds******";
-	$ftp["password"]    = "*********";
-	```
-
-	Die benötigten Zugangsdaten und den Hostnamen wird vom DWD per E-Mail nach der Registrierung (siehe Vorbereitung) mitgeteilt. Bei ```$ftp["username"]``` handelt es sich um den Benutzername und bei ```$ftp["password"]``` um das zugeteilte Passwort. Der Hostname ```$ftp["hostname"]``` muss in der Regel nicht angepasst werden.
-	
-2. Pfade zu den für das erstellen der Videos benötigten Konsolen-Programme 
+1. Pfade zu den für das erstellen der Videos benötigten Konsolen-Programme 
 
 	```php
 	// Pfade zu Konsolenprogramme:
 	$converter["video"] = "/usr/bin/ffmpeg";
-	$converter["gif"]   = "/usr/bin/convert";
+	$converter["gif"]   = "copy";
 	```	
 
 	Für ```$converter["video"]``` benötigt man den Pfad zur libav-tool oder ffmpeg Binary. Dies wird benötigt zum erstellen der webm/mp4-Videos.
 	
-	```$converter["gif"]``` benötigt den Pfad zum convert-Tool aus dem Imagemagick-Paket. Diese Binary dient zum erstellen der animierten GIF-Datei.
-	
-	Möchte man z.B. keine animierte GIF Datei erzeugen, so empfiehlt sich anstatt des Pfad *false* als Wert zu hinterlegen: 
+	```$converter["gif"]``` unterstützt zur Zeit nur die "copy"-Methode, daher darf für die gif-Unterstützung der Konfigurationsparameter nicht verändert werden, es sei denn, man möchte keine GIF Datei erzeugen. Hierfür muss der Parameter auf folgenden Wert verändert werden: 
 	```$converter["gif"] = false;```
 	
-3. Konfiguration der zu erstellenden Video-Dateien (Array):
+2. Konfiguration der zu erstellenden Video-Dateien (Array):
 
 	```php
-$config[] = array(	"remoteFolder"  => "/gds/gds/specials/radar",
-                  		"localFolder"   => "/srv/webspacepfad/radarDaten/de",
-						"runtimeHour"   => 4,
-						"output"        => array(	"webm" => "/srv/webspacepfad/htdocs/img/regenradar_de.webm",
-                                           			"mp4"  => "/srv/webspacepfad/htdocs/img/regenradar_de.mp4",
-													"gif"  => "/srv/webspacepfad/htdocs/img/regenradar_det.gif"),
-						"posterFile"    => "/srv/webspacepfad/htdocs/img/regenradar_de.jpg",
-						"forceRebuild"  => false
-                  );
+$config[] = [
+    "remoteURL" => "https://www.dwd.de/DWD/wetter/radar/radfilm_brd_akt.gif",
+    "posterURL" => "https://www.dwd.de/DWD/wetter/radar/rad_brd_akt.jpg",
+    "localFolder"  => "/srv/webspacepfad/tmp/radarDaten/de",
+    "output"       => [
+        "webm" => "/srv/webspacepfad/htdocs/img/regenradar_de.webm",
+        "mp4"  => "/srv/webspacepfad/htdocs/img/regenradar_de.mp4",
+        "gif"  => "/srv/webspacepfad/htdocs/img/regenradar_de.gif",
+        "poster" => "/srv/webspacepfad/htdocs/img/regenradar_southwest.de",
+    ],
+    "forceRebuild"  => false
+];
 	```	
-	Der Array-Wert ```"remoteFolder"``` für beinhaltet der Pfad auf dem DWD FTP Server welches die Radar-Daten beinhaltet. Der beispielhaft hinterlegte Pfad beinhaltet der Regenradar-Bilder für Deutschland. Es existieren in diesem Pfad auch Unterordner für einzelne Regionen innerhalb von Deutschland wie z.B. */gds/gds/specials/radar/southwest* für Süd/Westen von Deutschland (z.B. Baden-Würrtemberg).
+	Der Array-Wert ```"remoteURL"``` beinhaltet die URL der entsprechenden Video-Datei des DWD. Diese kann über die DWD-Homepage unter https://www.dwd.de/DE/leistungen/radarbild_film/radarbild_film.html ermittelt werden. Hierzu wählen Sie auf der genannten Seite Deutschland oder das benötigte Bundesland aus und klicken danach unterhalt der Grafik auf "Radarfilm". Nachdem der Radarfilm geladen ist, klicken Sie diesen mit der rechten Maustaste an und gehen auf *Bildadresse kopieren* (Safari/Chrome) bzw. *Grafikadresse kopieren* (Firefox). 
 	
-	Als Gegenstück zum Pfad auf dem FTP Server dient ```"localFolder"```. Dieser Array-Wert beinhaltet ein lokaler Ordner, in dem die benötigten einzelnen Radar-Bilder durch das Script gespeichert werden. 
-	
-	Mit dem Array-Wert ```"runtimeHour"``` wird hinterlegt, wieviele Stunden das Radar-Video zurück gehen soll. Erzeugt man zum Beispiel das Radar-Video um 18:15 und gibt als ```runtimeHour``` *4* Stunden an, dann werden für das Video die Radar-Bilder von 14:00 Uhr bis 18:15 verwendet. Der Start-Zeitpunkt ist dabei aktuell immer die jeweilige volle Stunde (noch).
+	Der zweite Array-Wert ```"posterURL"``` beinhaltet wiederum die URL des letzten Radarbilds, welches ebenfalls auf der DWD-Homepage angeboten wird. Die Schritte sind dabei ähnlich wie bei dem ermitteln der Video-URL. Einzig anstatt das Tab "Radarfilm" muss "Radarbild" ausgewählt werden. Das bestimmen der URL zur Grafik erfolgt analog zum vorherigen Schritt.
+
+	Als Gegenstück zum Pfad auf dem FTP Server dient ```"localFolder"```. Dieser Array-Wert beinhaltet ein lokaler Ordner, in dem das heruntergeladene Radarvideo zwischengespeichert wird. 
 	
 	```"output"``` ist der Dreh- und Angelpunkt für das erstellen der Videos und beinhaltet ein Array welches einerseits beinhaltet für welches Format (webm, mp4, gif) die Videos erzeugt werden sollen und den Ziel-Pfad in dem die Datei jeweils gespeichert werden soll. Im Beispiel werden die Videos in allen 3 verfügbaren Formate erstellt. Falls Sie z.B. die animierte GIF Datei nicht benötigen hinterlegen Sie anstatt des Zielpfad einfach *false*.
 	
-	Der vorletzte Konfigurationsparameter ```"posterFile"``` dient zum getrennten speichern des ersten im Video verwendeten Radar-Bild. Einige HTML5 Video-Player wie z.b. <http://www.videojs.com> verwenden eine Grafik für die schnelle Darstellung einer Grafik im Videoplayer noch bevor das Video heruntergeladen wurde. Sollte eine solche Poster-Datei nicht benötigt werden, verwenden Sie auch hier *false* als Parameter.
+	Innerhalb des gleichen Array findet sich neben webm/mp4 und gif auch noch das Ausgabe-Format *"poster"*. Hierbei handelt es sich um den Ausgabe-Pfad der Poster-Grafik für das verwendete Radar-Bild. Sollte eine solche Poster-Datei nicht benötigt werden, verwenden Sie auch hier *false* als Parameter.
 	
 	```"forceRebuild"``` dient ausschließlich zu Test-Zwecken und dient dazu das Script anzuweisen auf jeden Fall alle Videos neu zu erstellen unabhängig davon, ob neue Radar-Bilder hinzugekommen sind. Standardmäßig sollte dieser Parameter auf *false* stehen.
 	
@@ -142,5 +131,5 @@ $config[] = array(	"remoteFolder"  => "/gds/gds/specials/radar",
 --
 ##### Lizenz-Information:
 
-Copyright Jens Dutzi 2015-2017 / Stand: 10.07.2017 / Dieses Werk ist lizenziert unter einer [MIT Lizenz](http://opensource.org/licenses/mit-license.php)
+Copyright Jens Dutzi 2015-2017 / Stand: 30.12.2017 / Dieses Werk ist lizenziert unter einer [MIT Lizenz](http://opensource.org/licenses/mit-license.php)
 

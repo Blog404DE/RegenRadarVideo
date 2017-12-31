@@ -1,8 +1,8 @@
 <?php
 /*
  * DWD-Radar Video Konverter für neuthardwetter.de by Jens Dutzi
- * Version 2.0.3
- * 2017-07-18
+ * Version 3.0.0
+ * 2017-12-29
  * (c) tf-network.de Jens Dutzi 2012-2017
  *
  * Lizenzinformationen (MIT License):
@@ -33,10 +33,14 @@
  */
 function checkSystem($config, $converter)
 {
-    // Prüfe Vorraussetzungen
-    if (!extension_loaded("FTP")) {
-        throw new Exception("PHP FTP Modul steht nicht zur Verfügung");
+    // Prüfe ob libCurl vorhanden ist
+    if (!extension_loaded('curl')) {
+        throw new Exception(
+            "libCurl bzw. die das libCurl-PHP Modul steht nicht zur Verfügung."
+        );
     }
+
+    // Prüfe Vorraussetzungen
     if ($converter["video"] !== false) {
         if (!is_executable($converter["video"])) {
             throw new Exception(
@@ -45,9 +49,9 @@ function checkSystem($config, $converter)
         }
     }
     if ($converter["gif"] !== false) {
-        if (!is_executable($converter["gif"])) {
+        if ($converter["gif"] !== "copy") {
             throw new Exception(
-                "convert Binary von Imagemagick steht unter " . $converter["gif"] . " nicht zur verfügung."
+                "Für die GIF-Konvertieren steht ausschließlich der Weg  \"Copy\" zur Verfügung."
             );
         }
     }
@@ -56,7 +60,6 @@ function checkSystem($config, $converter)
     foreach ($config as $currentConfig) {
         checkPosterFile($currentConfig);
         checkFolders($currentConfig);
-        checkOutputFiles($currentConfig);
     }
 }
 
@@ -101,11 +104,24 @@ function checkFolders($currentConfig)
         );
     }
 
-    if (!file_exists($currentConfig["localFolder"] . "/frames")) {
-        if (!mkdir($currentConfig["localFolder"] . "/frames")) {
-            throw new Exception(
-                "Konnte das fehlende Verzeichnis " . $currentConfig["localFolder"] . "/frames nicht anlegen"
-            );
+    foreach ($currentConfig["output"] as $format => $outputFile) {
+        if ($outputFile !== false) {
+            if (!is_writeable(dirname($outputFile))) {
+                throw new Exception(
+                    "In Ziel-Datei Ordner (Format: " . $format .") " .
+                    dirname($outputFile) .
+                    " kann keine Datei angelegt werden"
+                );
+            }
+
+            if (file_exists($outputFile)) {
+                if (!is_writable($outputFile)) {
+                    throw new Exception(
+                        "Benötigte Ziel-Datei (Format: " . $format .") " .
+                        $outputFile . " ist nicht überschreibbar"
+                    );
+                }
+            }
         }
     }
 
@@ -114,243 +130,203 @@ function checkFolders($currentConfig)
 }
 
 /**
- * Prüfe Zugriff auf die Output-Files des Radar-Set
+ * Prüfe ob DWD VIdeo aktualisiert werden ,uss
  *
- * @param $currentConfig
- * @throws Exception
- */
-function checkOutputFiles($currentConfig)
-{
-    foreach (array($currentConfig["output"]) as $testname) {
-        if ($testname !== false && empty($testname)) {
-            if (!is_writeable(dirname($testname))) {
-                throw new Exception(
-                    "In Ziel-Datei Ordner " . dirname($testname) . " kann keine Datei angelegt werden"
-                );
-            }
-            if (file_exists($testname)) {
-                if (!is_writable($testname)) {
-                    throw new Exception("Benötigte Ziel-Datei " . $testname . " ist nicht überschreibbar");
-                }
-            }
-        }
-    }
-}
-
-/**
- * Verbindung aufbauen zum FTP Server
- *
- * @param $ftp
- * @return resource $ftpConnId
- * @throws Exception
- */
-function connectToFtp($ftp)
-{
-    $ftpConnId = ftp_connect($ftp["host"]);
-    if ($ftpConnId === false) {
-        throw new Exception(
-            "FTP Verbindungsaufbau zu " . $ftp["host"] . " ist fehlgeschlagen"
-        );
-    }
-
-    // Login mit Benutzername und Passwort
-    echo "Verbinde zu " .$ftp["host"] . " mit Benutzername " .$ftp["username"] . PHP_EOL;
-
-    $loginResult = @ftp_login($ftpConnId, $ftp["username"], $ftp["password"]);
-    ftp_pasv($ftpConnId, true);
-
-    // Verbindung überprüfen
-    if ((!$ftpConnId) || (!$loginResult)) {
-        throw new Exception(
-            "Verbindungsaufbau zu zu " . $ftp["host"] . " mit Benutzername " . $ftp["username"] . " fehlgeschlagen."
-        );
-    }
-
-    return $ftpConnId;
-}
-
-/**
- * Lade Datei-Liste herunter
- *
- * @param $ftpConnId
- * @param $currentConfig
- * @return array
+ * @param $localfile
+ * @param $remotefile
+ * @return boolean
  * @throws
  */
-function getFileList($ftpConnId, $currentConfig)
+function checkDWDRadarVideoForUpdate($localfile, $remotefile)
 {
-    // Versuche, in das benötigte Verzeichnis zu wechseln
-    if (!ftp_chdir($ftpConnId, $currentConfig["remoteFolder"])) {
-        echo "Aktuelles Verzeichnis: " . ftp_pwd($ftpConnId)  . PHP_EOL;
-        throw new Exception("Verzeichniswechsel ist fehlgeschlagen");
-    }
-    echo "Aktuelles Verzeichnis: " . ftp_pwd($ftpConnId)  . PHP_EOL;
+    $updateVideo = null;
 
+    // Beginne Prüfung über den Zeitstempel des letzten Updates
+    $curl = curl_init();
+    curl_setopt($curl, CURLOPT_URL, $remotefile);
+    curl_setopt($curl, CURLOPT_FILETIME, true);
+    curl_setopt($curl, CURLOPT_NOBODY, true);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($curl, CURLOPT_HEADER, true);
+    curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
 
-    // Verzeichnisliste auslesen und sortieren
-    $arrFTPContent = ftp_nlist($ftpConnId, ".");
-    if (count($arrFTPContent) == 0 || $arrFTPContent === false) {
-        throw new Exception("Auslesen des Verezichnis " . $currentConfig["remoteFolder"] . " fehlgeschlagen");
-    }
-
-    // Zeit-Filter erzeugen nach GMT/UTC (-> damit nur die Grafiken der letzten x Stunden verarbeitet werden)
-    $startDatum = time() - ($currentConfig["runtimeHour"] * 60 * 60);
-
-    echo("Erzeuge Download-Liste:" . PHP_EOL);
-    $arrDownloadList = array();
-    foreach ($arrFTPContent as $filename) {
-        // Prüfe Datum
-        $fileDate = ftp_mdtm($ftpConnId, $filename);
-        if ($fileDate >= $startDatum) {
-            echo("-> " . $filename . " => " . date("d.m.Y H:i", $fileDate) . PHP_EOL);
-            $arrDownloadList[$filename] = $fileDate;
-        }
-    }
-
-    // Dateiliste absteigend sortieren
-    arsort($arrDownloadList, SORT_NUMERIC);
-
-    return $arrDownloadList;
-}
-
-/**
- * Dateien vom FTP Server herunternladen
- *
- * @param $ftpConnId
- * @param $currentConfig
- * @param $arrDownloadList
- * @return bool
- * @throws
- */
-function downloadRadarImages($ftpConnId, $currentConfig, $arrDownloadList)
-{
-    // Beginne Download
-    echo(PHP_EOL . "Starte den Download neuer Radar-Dateien von " . count($arrDownloadList) . " Radarbilder" . PHP_EOL);
-
-    $needRebuild = false;
-    $filecount = 0;
-    foreach ($arrDownloadList as $filename => $filetime) {
-        $localFile = $currentConfig["localFolder"] . "/" . $filename;
-
-        if (!file_exists($localFile)) {
-            $needRebuild = true;
-
-            // Öffne lokale Datei
-            $handle = fopen($localFile, 'w');
-
-            echo "-> Datei " . $localFile . " (" .
-                date("d.m.Y H:i", $filetime) .
-                ") wird heruntergeladen." . PHP_EOL;
-
-            if (!ftp_fget($ftpConnId, $handle, $filename, FTP_BINARY, 0)) {
-                throw new Exception(
-                    "Datei: " . $filename . " (" .
-                    date("d.m.Y H:i", $filetime) .
-                    ") Download ist fehlgeschlagen"
-                );
-            }
-
-            $filecount++;
-
-            // Schließe Datei-Handle
-            fclose($handle);
-        }
-    }
-
-    echo("-> Download " . $filecount . " neuer erfolgreich abgeschlossen" . PHP_EOL);
-
-    return $needRebuild;
-}
-
-/**
- * Download-Ordner bereinigen
- *
- * @param $currentConfig
- * @param $arrDownloadList
- * @throws Exception
- */
-function cleanDownloadFolder($currentConfig, $arrDownloadList)
-{
-    // Symlink-Verzeichnis leeren
-    echo(PHP_EOL . "Setze Symlink-Verzeichnis zurück" . PHP_EOL);
-    array_map('unlink', glob($currentConfig["localFolder"] . "/frames/frame*.jpg"));
-    echo("-> Symlinks erfolgreich zurückgesetzt" . PHP_EOL);
-
-    // Entferne veraltete Dateien aus dem Download-Verzeichnis
-    echo(PHP_EOL . "Führe Bereinigung durch:" . PHP_EOL);
-    $arrLocalFiles = glob($currentConfig["localFolder"] . "/Webradar_*.jpg");
-    arsort($arrLocalFiles);
-
-    if ($arrLocalFiles === false) {
-        throw new Exception("Fehler beim bereinigen der alten Dateien - generiere daher keine neue Regen-Animation");
-    }
-
-    // Ermittle Dateien die nicht mehr benötigt werden
-    $arrOldFiles = array_diff(
-        $arrLocalFiles,
-        array_map(function ($item) use ($currentConfig) {
-            return $currentConfig["localFolder"] . "/" . $item;
-        }, array_keys($arrDownloadList))
-    );
-
-    // Lösche Dateien
-    if (count($arrOldFiles) > 0) {
-        array_map(
-            function ($delFile) {
-                @unlink($delFile);
-                echo "Lösche veraltete Datei: " . $delFile . PHP_EOL;
-            },
-            $arrOldFiles
+    // Daten erfolgreich ermittelt?
+    if (!curl_exec($curl)) {
+        throw new Exception(
+            "Verbindung zum DWD-Webserver für die Prüfung des letzten Updates ist fehlgeschlagen " .
+            "(URL: " . basename($remotefile) . ")"
         );
     }
 
-    if (count($arrOldFiles) == 0) {
-        echo "Keine Dateien zum bereinigen gefunden" . PHP_EOL;
+    // Zeitpunkt des letzten Updates ermitteln
+    $info=curl_getinfo($curl);
+
+    // Ermittle ob aktualisiert werden muss über den "Last-Modified"-Zeitstempel
+    if (array_key_exists("filetime", $info)) {
+        // Remote Filetime
+        $remotefilemtime = $info["filetime"];
+
+        // Erzwnge Update
+        echo("  -> Upload-Zeitstempel: " . date("d.m.Y H:i:s", $remotefilemtime) . PHP_EOL);
+
+        // Ermittle Zeitstempel der letzten Datei falls vorhanden
+        if (file_exists($localfile)) {
+            $localfilemtime = filemtime($localfile);
+            echo("  -> Lokale Datei: " . date("d.m.Y H:i:s", $localfilemtime) . PHP_EOL);
+
+            if ($localfilemtime < $remotefilemtime) {
+                echo("-> Update des Radar-Videos erforderlich" . PHP_EOL);
+                $updateVideo = true;
+            } elseif ($localfilemtime >= $remotefilemtime) {
+                echo("-> Kein Update Radar-Videos erforderlich" . PHP_EOL);
+                $updateVideo = false;
+            }
+        }
+    } elseif (array_key_exists("download_content_length", $info)) {
+        // Wurde Update-Prüfung durchgeführt?
+        echo(
+            "\t** WARNUNG: Upload-Zeitstempel ist nicht vorhanden " .
+            "(Prüfe auf Veränderung der Dateigröße) ** " . PHP_EOL
+        );
+
+        // Falle zurück auf Prüfung über den Dateinamen
+        $remotefilesize = (int)$info["download_content_length"];
+        $localfilesize = (int)filesize($localfile);
+
+        echo("\t-> Entfernte Datei: " . round($remotefilesize / 1024) . " kBytes" . PHP_EOL);
+        echo("\t-> Lokale Datei: " . round($localfilesize / 1024) . " kBytes " . PHP_EOL);
+
+        if ($remotefilesize == $localfilesize) {
+            echo("-> Kein Update Radar-Videos erforderlich" . PHP_EOL);
+            $updateVideo = false;
+        } elseif ($remotefilesize != $localfilesize) {
+            echo("-> Update des Radar-Videos erforderlich" . PHP_EOL);
+            $updateVideo = true;
+        }
     }
+
+    // Schließe Verbindung zum Webserver
+    curl_close($curl);
+
+    return $updateVideo;
 }
 
 /**
- * Bereite Radar-Videos vor
+ * Rardar-Datei herunterladen
  *
- * @param $currentConfig
- * @param $arrDownloadList
- * @param $filetype
+ * @param $localfile
+ * @param $remotefile
  * @throws Exception
  */
-function prepaireRadarVideo($currentConfig, $arrDownloadList, $filetype)
+function downloadRadarFile($localfile, $remotefile)
 {
-    // Symlinks neu erzeugen
-    $revDownloadList = array_reverse($arrDownloadList, true);
-    $filenr = 0;
+    echo(PHP_EOL . "Starte Download des Radar-Videos:" . PHP_EOL);
 
-    echo(PHP_EOL . "Erzeuge " . count($revDownloadList) . " Symlinks für die einzelnen Video-Frames" . PHP_EOL);
-    foreach (array_keys($revDownloadList) as $filename) {
-        $symlink = $currentConfig["localFolder"] . "/frames/frame" . str_pad($filenr, 3, "0", STR_PAD_LEFT) . ".jpg";
-        if (is_link($symlink)) {
-            if (!unlink($symlink)) {
-                throw new Exception("Löschen des Symlink " . $symlink . " fehlgeschlagen");
-            }
-        }
-
-        if (!symlink("../" . $filename, $symlink)) {
-            throw new Exception("Erzeugen des Symlink " . $symlink . " fehlgeschlagen");
-        };
-
-        $filenr++;
+    // File-Handler öffnen
+    $filehandler = fopen($localfile, 'w+');
+    if (!$filehandler) {
+        throw new Exception(
+            "Filehandler für " . $localfile . " zum speichern des Downloads konnte nicht geöffnet werden " .
+            "(URL: " . basename($remotefile) . ")"
+        );
     }
-    echo("-> Symlinks erfolgreich erzeugt" . PHP_EOL);
 
-    // Poster-File kopieren
-    if (!empty($currentConfig["posterFile"]) && $currentConfig["posterFile"] !== false) {
-        reset($revDownloadList);
-        $lastImage = $currentConfig["localFolder"] . "/" . key($revDownloadList);
-        echo(PHP_EOL);
-        echo("Kopiere Poster-File " . key($revDownloadList) . " für " . $filetype . "-Videos in Ziel-Ordner" . PHP_EOL);
-        if (!copy($lastImage, $currentConfig["posterFile"])) {
-            throw new Exception("Kopieren des Poster-File " . key($revDownloadList) . " fehlgeschlagen");
-        }
-        echo("-> Datei erfolgreich kopiert" . PHP_EOL);
+    // Download initialisieren
+    $curl = curl_init();
+    curl_setopt($curl, CURLOPT_URL, $remotefile);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($curl, CURLOPT_HEADER, false);
+    curl_setopt($curl, CURLOPT_PROGRESSFUNCTION, 'downloadProgress');
+    curl_setopt($curl, CURLOPT_NOPROGRESS, false);
+    curl_setopt($curl, CURLOPT_BINARYTRANSFER, true);
+    curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($curl, CURLOPT_FILE, $filehandler);
+
+    // Datei herunterladen
+    if (!curl_exec($curl)) {
+        throw new Exception(
+            "Verbindung zum DWD-Webserver für die Prüfung des letzten Updates ist fehlgeschlagen " .
+            "(URL: " . basename($remotefile) . ")"
+        );
     }
+
+    echo(PHP_EOL . "-> Download abgeschlossen". PHP_EOL);
+}
+
+/**
+ * Poster-Datei herunterladen
+ *
+ * @param $localfile
+ * @param $remotefile
+ * @throws Exception
+ */
+function downloadPosterFile($localfile, $remotefile)
+{
+    echo(PHP_EOL . "Starte Download der Poster-Grafik:" . PHP_EOL);
+
+    // File-Handler öffnen
+    $filehandler = fopen($localfile, 'w+');
+    if (!$filehandler) {
+        throw new Exception(
+            "Filehandler für " . $localfile . " zum speichern der Poster-Grafik konnte nicht geöffnet werden " .
+            "(URL: " . basename($remotefile) . ")"
+        );
+    }
+
+    // Download initialisieren
+    $curl = curl_init();
+    curl_setopt($curl, CURLOPT_URL, $remotefile);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($curl, CURLOPT_HEADER, false);
+    curl_setopt($curl, CURLOPT_PROGRESSFUNCTION, 'downloadProgress');
+    curl_setopt($curl, CURLOPT_NOPROGRESS, false);
+    curl_setopt($curl, CURLOPT_BINARYTRANSFER, true);
+    curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($curl, CURLOPT_FILE, $filehandler);
+
+    // Datei herunterladen
+    if (!curl_exec($curl)) {
+        throw new Exception(
+            "Verbindung zum DWD-Webserver für die Prüfung des letzten Updates ist fehlgeschlagen " .
+            "(URL: " . basename($remotefile) . ")"
+        );
+    }
+
+    echo(PHP_EOL . "-> Download abgeschlossen". PHP_EOL);
+}
+
+/**
+ * cURL Download Progress darstellen
+ * (lubCurl Callback-Funktion)
+ *
+ * @param $resource
+ * @param $downloadSize [optional]
+ * @param $downloaded [optional]
+ * @param $uploadSize [optional]
+ * @param $uploaded [optional]
+ * @throws
+ */
+function downloadProgress($resource, $downloadSize, $downloaded, $uploadSize, $uploaded)
+{
+    // Ressource vorhanden?
+    if (!is_resource($resource)) {
+        throw new Exception(
+            "Interner Fehler: downloadProgress wurde direkt und nicht über libCurl aufgerufen"
+        );
+    }
+
+    if ($downloadSize > 0) {
+        echo("-> " . sprintf('%.2f', ($downloaded/$downloadSize)*100)  . "% abgeschlossen (" .
+            round($downloaded/1024) . " kbyte von " . round($downloadSize / 1024) . " kbytes" .
+            ")\r"
+        );
+    } elseif ($uploadSize > 0) {
+        echo("-> " . sprintf('%.2f', ($uploaded/$uploadSize)*100)  . "% abgeschlossen (" .
+            round($uploaded/1024) . " kbyte von " . round($uploadSize / 1024) . " kbytes" .
+            ")\r"
+        );
+    }
+    flush();
 }
 
 /**
@@ -364,52 +340,37 @@ function prepaireRadarVideo($currentConfig, $arrDownloadList, $filetype)
  */
 function createRadarVideo($filetype, $converter, $config)
 {
-    echo(PHP_EOL . "Starte kompilieren des des " . $filetype . "-Video" . PHP_EOL);
-    echo("-> Dieser Vorgang kann einige Zeit dauern ... " . PHP_EOL);
-
     // Animation neu erzeugen
     $tmpRegenAnimation = tempnam(sys_get_temp_dir(), 'RegenRadar');
 
     // Kommando auswählen anhand des Dateiformats
-    $cmd = "";
-    switch ($filetype) {
-        case "webm":
-            if ($converter["video"] == false) {
-                throw new Exception("Binary für Video-Erzeugung nicht konfiguriert");
-            }
-            $cmd = $converter["video"] .
-                " -loglevel error -hide_banner -nostats -y -framerate 2/1 " .
-                "-i " . escapeshellarg($config["localFolder"] . "/frames/frame%03d.jpg") . " " .
-                "-c:v libvpx -r 30 -an -b:v 600k -pix_fmt yuv420p -f webm " .
-                escapeshellarg($tmpRegenAnimation);
-            break;
-        case "mp4":
-            if ($converter["video"] == false) {
-                throw new Exception("Binary für Video-Erzeugung nicht konfiguriert");
-            }
-            $cmd = $converter["video"] .
-                " -loglevel error -hide_banner -nostats -y -framerate 2/1 " .
-                "-i " . escapeshellarg($config["localFolder"] . "/frames/frame%03d.jpg") . " " .
-                "-c:v libx264 -r 30 -an -b:v 600k -pix_fmt yuv420p -f mp4 " .
-                escapeshellarg($tmpRegenAnimation);
-            break;
-        case "gif":
-            if ($converter["gif"] == false) {
-                throw new Exception("Binary für Video-Erzeugung nicht konfiguriert");
-            }
-            $cmd = $converter["gif"] .
-                " -delay 50 -loop 0 " .
-                escapeshellarg($config["localFolder"] . "/frames/frame*.jpg") . " " . +
-                "gif:" . escapeshellarg($tmpRegenAnimation);
-            break;
-    }
+    if ($filetype == "webm" || $filetype == "mp4") {
+        echo(PHP_EOL . "Starte kompilieren des " . $filetype . "-Video" . PHP_EOL);
+        echo("-> Dieser Vorgang kann einige Zeit dauern ... " . PHP_EOL);
 
-    // Konvertierung durchführen
-    $exitval = exec($cmd, $output);
+        // Standard-Format festlegen
+        $exportFormat = "libx264";
 
-    // Erzeugte Dateien bereitstellen
-    if (is_null($output) || $exitval != 0) {
-        throw new Exception("Fehler beim ausführen des Konvertierungs-Auftrags");
+        // Soll WebM erzeugt werden?
+        if ($filetype == "webm") {
+            $exportFormat = "libvpx";
+        }
+
+        $cmd = $converter["video"] .
+            " -loglevel error -hide_banner -nostats -y " .
+            "-i " . escapeshellarg($config["localFolder"] . "/" . basename($config["remoteURL"])) . " " .
+            "-c:v " . escapeshellarg($exportFormat) . " -r 30 -an -b:v 600k -pix_fmt yuv420p " .
+            "-f " . escapeshellarg($filetype) . " " .  escapeshellarg($tmpRegenAnimation);
+
+        $exitval = exec($cmd, $output);
+        if (is_null($output) || $exitval != 0) {
+            throw new Exception("Fehler beim ausführen des Konvertierungs-Auftrags");
+        }
+    } elseif ($filetype == "gif") {
+        echo(PHP_EOL . "Starte kopieren des " . $filetype . "-Video" . PHP_EOL);
+
+        // Für das GIF-Format einfach kopieren
+        copy($config["localFolder"] . "/" . basename($config["remoteURL"]), $tmpRegenAnimation);
     }
 
     return $tmpRegenAnimation;
