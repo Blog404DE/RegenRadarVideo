@@ -1,5 +1,9 @@
 # Regen-Radar Script
 
+## Wichtiger Hinweis
+
+**Mit der Einstellung des Grundversorgungs-Zugang des DWD und der Umstellung auf OpenData wird die Version 1.x sowie 2.x (bzw. der Master-Branch) nicht mehr unterstützt. Bitte laden Sie daher unter "Releases" die Version 3.0.0 bzw. das "Develop"-Branch um die OpenData-Unterstützung zu erhalten.**
+
 ## Einleitung
 
 Das Regenradar-Script dient zum erstellen von Videos bzw. animierten GIF-Dateien anhand der vom Deutschen Wetterdienst im Rahmen der Grundversorgung angebotenen Regenradar-Bilder für ganz Deutschland bzw. einzelnen Regionen innerhalb von Deutschland. Details zur Grundversorgung finden sich auf der [NeuthardWetterScripts Hauptseite](https://github.com/Blog404DE/NeuthardWetterScripts).
