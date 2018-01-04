@@ -1,8 +1,13 @@
 # Changelog
 
+2018-01-03, 3.1.0 stable
+----------
+* Copyright-String angepasst
+* Noch kleinere Anpassungen an der Formatierung 
+* *Bitte den Hinweis unter 3.0.0 beachten!*
+  
 2017-12-29, 3.0.0 develop
 ---------
-
 * Komplette Umstellung des Scripts auf eine alternative Download-Methode, nachdem der DWD den Grundversorgungs-Server 
 demnächst schließen wird und im Rahmen der OpenData-Programm die einzelnen Radar-Bilder nicht mehr zur Verfügung stehen
 * Überarbeitete Konfigurationsdatei - *unbedingt beachten!*

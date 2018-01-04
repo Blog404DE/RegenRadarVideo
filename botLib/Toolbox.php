@@ -1,9 +1,9 @@
 <?php
 /*
  * DWD-Radar Video Konverter für neuthardwetter.de by Jens Dutzi
- * Version 3.0.0
- * 2017-12-29
- * (c) tf-network.de Jens Dutzi 2012-2017
+ * Version 3.1.0
+ * 2018-03-01
+ * (c) Jens Dutzi 2012-2018
  *
  * Lizenzinformationen (MIT License):
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this
