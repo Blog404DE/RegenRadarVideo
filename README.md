@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/Blog404DE/RegenRadarVideo.svg?branch=develop)](https://travis-ci.org/Blog404DE/RegenRadarVideo)
+[![Build Status](https://travis-ci.org/Blog404DE/RegenRadarVideo.svg?branch=master)](https://travis-ci.org/Blog404DE/RegenRadarVideo)
 
 # Regen-Radar Script
 

@@ -27,7 +27,6 @@
 
 try {
     // Konfigurations-Arrays initialisieren
-    $ftp = [];
     $config = [];
     $converter = [];
 
