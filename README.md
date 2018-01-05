@@ -4,7 +4,7 @@
 
 ## Wichtiger Hinweis
 
-**Mit der Einstellung des Grundversorgungs-Zugang des DWD und der Umstellung auf OpenData wird die Version 1.x sowie 2.x (bzw. der Master-Branch) nicht mehr unterstützt. Bitte laden Sie daher unter "Releases" die Version 3.0.0 bzw. das "Develop"-Branch um die OpenData-Unterstützung zu erhalten.**
+**Mit der Einstellung des Grundversorgungs-Zugang des DWD und der Umstellung auf OpenData wird die Version bis einschließlich 2.x nicht mehr unterstützt. Bitte laden Sie daher unter "Releases" die Version 3.0.0 oder neuer bzw. das "Develop"-Branch um die OpenData-Unterstützung zu erhalten.**
 
 ## Einleitung
 
