@@ -1,5 +1,5 @@
 {
-  "name": "Blog404DE/regenradarvideo",
+  "name": "blog404de/regenradarvideo",
   "description": "Registration info to admin",
   "keywords": [
     "DWD",
@@ -21,7 +21,13 @@
     "issues": "https://github.com/Blog404DE/RegenRadarVideo/issues"
   },
   "require-dev": {
-    "squizlabs/PHP_CodeSniffer":    "@stable",
-    "phpmd/phpmd" : "@stable"
+    "phpmd/phpmd" : "*",
+    "sebastian/phpcpd": "*",
+    "wapmorgan/php-code-fixer": "*",
+    "squizlabs/php_codesniffer": "*",
+    "friendsofphp/php-cs-fixer": "*"
+  },
+  "require": {
+    "ext-curl": "*"
   }
 }

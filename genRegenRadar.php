@@ -1,33 +1,20 @@
 #!/usr/bin/env php
 <?php
-/*
- * DWD-Radar Video Konverter für neuthardwetter.de by Jens Dutzi
- * Version 3.1.0
- * 2018-03-01
- * (c) Jens Dutzi 2012-2018
+/**
+ * DWD-Radar Video Konverter für neuthardwetter.de by Jens Dutzi - RegenRadar.php
  *
- * Lizenzinformationen (MIT License):
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this
- * software and associated documentation files (the "Software"), to deal in the Software
- * without restriction, including without limitation the rights to use, copy, modify,
- * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to the following
- * conditions:
- *
- * The above copyright notice and this permission notice shall be included in all copies
- * or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
- * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
- * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
- * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
- * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * @package    blog404de\RegenRadar
+ * @author     Jens Dutzi <jens.dutzi@tf-network.de>
+ * @copyright  Copyright (c) 2012-2018 Jens Dutzi (http://www.neuthardwetter.de)
+ * @license    https://github.com/Blog404DE/RegenRadarVideo/blob/master/LICENSE.md
+ * @version    3.1.5-stable
+ * @link       https://github.com/Blog404DE/RegenRadarVideo
  */
+
+use blog404de\RegenRadar\RegenRadar;
 
 try {
     // Konfigurations-Arrays initialisieren
-    $ftp = [];
     $config = [];
     $converter = [];
 
@@ -40,8 +27,8 @@ try {
         );
     }
 
-    // Toolbox laden
-    require_once  dirname(__FILE__) . "/botLib/Toolbox.php";
+    // Autoloader initialisieren
+    require_once  dirname(__FILE__) . "/botLib/autoload.php";
 
     /*
      * ================================================================================================
@@ -49,8 +36,7 @@ try {
      * ================================================================================================
      */
 
-    // Prüfe System
-    checkSystem($config, $converter);
+    $regenradarBot = new RegenRadar($config, $converter);
 
     // Erzeuge Radar-Videos
     foreach ($config as $value) {
@@ -63,7 +49,7 @@ try {
         // Prüfe DWD Video nach potentiellen Updates
         echo("Prüfe ob Update des Videos notwendig ist:" . PHP_EOL);
         if (file_exists($localVideoFile) && !$value["forceRebuild"]) {
-            $needRebuild = checkDWDRadarVideoForUpdate($localVideoFile, $value["remoteURL"]);
+            $needRebuild = $regenradarBot->network->checkDWDRadarVideoForUpdate($localVideoFile, $value["remoteURL"]);
         } elseif ($value["forceRebuild"]) {
             echo("-> Update des Videos ist wurde erzwungen durch die Konfigurationsdatei" . PHP_EOL);
             $needRebuild = true;
@@ -79,7 +65,7 @@ try {
             );
         } elseif ($needRebuild) {
             // Download des Radar-Videos
-            downloadRadarFile($localVideoFile, $value["remoteURL"]);
+            $regenradarBot->network->downloadRadarFile($localVideoFile, $value["remoteURL"]);
 
             // Erzeuge die Videos
             foreach ($value["output"] as $filetype => $filename) {
@@ -89,8 +75,8 @@ try {
                     if (empty($filename) || $filename === false) {
                         echo("-> Erzeugen des " . $filetype . "-Videos in der Konfiguration deaktiviert" . PHP_EOL);
                     } else {
-                        $tmpRegenAnimation = createRadarVideo($filetype, $converter, $value);
-                        saveRadarVideo($tmpRegenAnimation, $filename);
+                        $tmpRegenAnimation = $regenradarBot->createRadarVideo($filetype, $converter, $value);
+                        $regenradarBot->saveRadarVideo($tmpRegenAnimation, $filename);
                     }
                 } else {
                     $header = "Lade Poster-Datei für das Video vom DWD Webserver";
@@ -99,7 +85,7 @@ try {
                     if ($value["posterURL"] === false) {
                         echo(PHP_EOL . "-> Download der Poster-Datei wird nicht benötigt" . PHP_EOL);
                     } else {
-                        downloadPosterFile($filename, $value["posterURL"]);
+                        $regenradarBot->network->downloadPosterFile($filename, $value["posterURL"]);
                     }
                 }
             }

@@ -14,7 +14,7 @@ Das Regenradar-Script dient zum erstellen von Videos bzw. animierten GIF-Dateien
 ### Vorraussetzungen:
 
 - Linux (unter Debian getestet)
-- PHP 5.6 (oder neuer) mit aktiviertem curl-Modul
+- PHP 7.0 (oder neuer) mit aktiviertem curl-Modul
 - ffmpeg oder libav-tools installiert (für mp4/webm-Videos)
 - Shell-Zugriff zum einrichten eines Cronjob
 

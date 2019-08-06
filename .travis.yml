@@ -1,15 +1,17 @@
 language: php
 php:
-  - '5.6'
   - '7.0'
   - '7.1'
+  - '7.2'
+  - '7.3'
 before_script:
   - composer self-update
   - composer update
 script:
-  - "./vendor/bin/phpcs genRegenRadar.php botLib/* --extensions=php --standard=PSR1"
-  - "./vendor/bin/phpmd genRegenRadar.php,config.sample.php,botLib/Toolbox.php text cleancode,codesize,controversial,design,naming,unusedcode"
+  - "./vendor/bin/phpcf -t ${TRAVIS_PHP_VERSION} genRegenRadar.php config.sample.php ./botLib"
+  - "./vendor/bin/phpcpd genRegenRadar.php config.sample.php ./botLib"
+  - "./vendor/bin/phpcs --colors --standard=PSR1 --extensions=php genRegenRadar.php config.sample.php botLib/*"
+  - "./vendor/bin/phpmd botLib/ text cleancode,codesize,controversial,design,naming,unusedcode"
 cache:
   directories:
     - $HOME/.composer/cache/files
-    
