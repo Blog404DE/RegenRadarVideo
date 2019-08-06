@@ -11,6 +11,14 @@
  *  @link       https://github.com/Blog404DE/RegenRadarVideo
  */
 
-set_include_path(__DIR__ . PATH_SEPARATOR . get_include_path());
-spl_autoload_extensions('.php');
-spl_autoload_register('spl_autoload');
+spl_autoload_register(function ($class) {
+    // Basis-Verzeichnis ermitteln
+    $base_dir = __DIR__ . DIRECTORY_SEPARATOR;
+
+    // Klassen-Pfad anhand des Namespace hinzufügen
+    $file = $base_dir . str_replace('\\', '/', $class) . '.php';
+
+    // Prüfe ob Klassen-Datei vorhanden ist und falls ja, lade diese über den Autoloader,
+    /** @noinspection PhpIncludeInspection */
+    require $file;
+});
