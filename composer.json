@@ -1,12 +1,12 @@
 {
   "name": "blog404de/regenradarvideo",
+  "type": "project",
   "description": "Registration info to admin",
   "keywords": [
     "DWD",
     "Regenradar",
     "Satellitenbild"
   ],
-  "type": "project",
   "homepage": "https://github.com/Blog404DE/RegenRadarVideo",
   "license": "MIT",
   "authors": [
@@ -28,6 +28,14 @@
     "friendsofphp/php-cs-fixer": "*"
   },
   "require": {
+    "php": "^7.0",
     "ext-curl": "*"
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "autoload": {
+    "psr-4": {
+      "blog404de\\RegenRadar\\": "botLib/"
+    }
   }
 }

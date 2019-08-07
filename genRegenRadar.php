@@ -28,7 +28,7 @@ try {
     }
 
     // Autoloader initialisieren
-    require_once __DIR__ . '/botLib/autoload.php';
+    require_once __DIR__ . '/vendor/autoload.php';
 
     /*
      * ================================================================================================

@@ -35,6 +35,11 @@ Das Regenradar-Script dient zum erstellen von Videos bzw. animierten GIF-Dateien
 	```bash
 	yum install ffmpeg
 	```
+2. Notwendige Librarys über Composer laden
+
+	```bash./gen
+	composer install --no-dev
+	```
 
 ### Konfiguration *(neu)*:
 
