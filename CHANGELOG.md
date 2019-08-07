@@ -1,5 +1,12 @@
 # Changelog
 
+2019-08-06, 3.2.0 develop
+----------
+* Kleinere Änderung beim Ladeverhalten der Klassen
+* Klassennamen angepasst
+* Netzwerk-Funktionen der Übersicht wegen auseglagert in eigene Klasse
+* Codestyle angepasst (PSR-1)
+
 2018-01-03, 3.1.0 stable
 ----------
 * Copyright-String angepasst
