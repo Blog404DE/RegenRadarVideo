@@ -35,10 +35,10 @@ Das Regenradar-Script dient zum erstellen von Videos bzw. animierten GIF-Dateien
 	```bash
 	yum install ffmpeg
 	```
-2. Notwendige Librarys über Composer laden
+2. Notwendige Librarys über Composer/Packagist in der Stable-Version laden
 
-	```bash./gen
-	composer install --no-dev
+	```bash
+	composer create-project --no-dev blog404de/regenradarvideo
 	```
 
 ### Konfiguration *(neu)*:
@@ -131,7 +131,6 @@ Die anzupassenden Konfigurationsparameter in der *config.local.php* lauten wie f
 
 	In diesem Script müssen Sie selbstverständlich den Pfad zum Regenrader-Script entsprechend anpassen.
 
-
 	Als Update-Frequenz für die Videos hat sich alle 15 Minuten herausgestellt, auch wenn der DWD alle 5 Minuten neue Bilder hinterlegt. Bei der gewünschten Update-Frequenz sollte beachtet werden, dass das erzeugen der Videos je nach System einige Zeit beansprucht (insbesondere die animierte GIF Datei). Für ein ausführen des Cronjob alle 15 Minuten würde die Cronjob-Zeile wie folgt aussehen:
 	```*/15 * * * * /pfad/zum/script/cron.genRegenRadar.sh```, wobei hier der Pfad zum Shell-Script aus Schritt 2 angepasst werden muss.
 
@@ -139,5 +138,5 @@ Die anzupassenden Konfigurationsparameter in der *config.local.php* lauten wie f
 --
 ##### Lizenz-Information:
 
-Copyright Jens Dutzi 2015-2017 / Stand: 30.12.2017 / Dieses Werk ist lizenziert unter einer [MIT Lizenz](http://opensource.org/licenses/mit-license.php)
+Copyright Jens Dutzi 2015-2019 / Stand: 07.08.2019 / Dieses Werk ist lizenziert unter einer [MIT Lizenz](http://opensource.org/licenses/mit-license.php)
 

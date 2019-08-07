@@ -1,7 +1,7 @@
 {
   "name": "blog404de/regenradarvideo",
   "type": "project",
-  "description": "Registration info to admin",
+  "description": "Erzeugt Regenradar-Videos für die eigene Homepage anhand der vom DWD bereitgestellten Radarbilder",
   "keywords": [
     "DWD",
     "Regenradar",
@@ -21,7 +21,7 @@
     "issues": "https://github.com/Blog404DE/RegenRadarVideo/issues"
   },
   "require-dev": {
-    "phpmd/phpmd" : "*",
+    "phpmd/phpmd": "*",
     "sebastian/phpcpd": "*",
     "wapmorgan/php-code-fixer": "*",
     "squizlabs/php_codesniffer": "*",
@@ -36,6 +36,11 @@
   "autoload": {
     "psr-4": {
       "blog404de\\RegenRadar\\": "botLib/"
+    }
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-develop": "3.2.x-dev"
     }
   }
 }
