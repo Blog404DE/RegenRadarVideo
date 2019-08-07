@@ -6,6 +6,7 @@
 * Klassennamen angepasst
 * Netzwerk-Funktionen der Übersicht wegen auseglagert in eigene Klasse
 * Codestyle angepasst (PSR-1)
+* Unterstützung von Packagist.org für einfachere Installation
 
 2018-01-03, 3.1.0 stable
 ----------
@@ -30,10 +31,10 @@ demnächst schließen wird und im Rahmen der OpenData-Programm die einzelnen Rad
 * Formatierung des Codes nach PSR2
 * Diverse Optimierungen und Verbesserung der System-Prüfung
 
-2017-07-08, 1.6.0 stable
+2017-07-08, 1.6.0 develop
 ----------
 * Aufräumen des Download-Ordner überarbeitet 
 
-2017-03-04, 1.5.1 stable
+2017-03-04, 1.5.1 develop
 ----------
 - Erstes Release als eigenständiges Projekt
