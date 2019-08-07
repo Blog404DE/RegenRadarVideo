@@ -1,6 +1,6 @@
 # Changelog
 
-2019-08-06, 3.2.0 develop
+2019-08-06, 3.2.0 stable
 ----------
 * Kleinere Änderung beim Ladeverhalten der Klassen
 * Klassennamen angepasst
