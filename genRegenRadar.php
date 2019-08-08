@@ -41,7 +41,7 @@ try {
     // Erzeuge Radar-Videos
     foreach ($config as $value) {
         $header = 'Beginne mit dem erzeugen des Radar-Video vom DWD Webserver: ' . basename($value['remoteURL']);
-        echo PHP_EOL . $header . PHP_EOL . str_repeat('=', \strlen($header)) . PHP_EOL;
+        echo PHP_EOL . $header . PHP_EOL . str_repeat('=', \mb_strlen($header)) . PHP_EOL;
 
         // Lokaler Dateiname für das Download
         $localVideoFile = $value['localFolder'] . '/' . basename($value['remoteURL']);
@@ -72,7 +72,7 @@ try {
             foreach ($value['output'] as $filetype => $filename) {
                 if ('poster' !== $filetype) {
                     $header = 'Erzeuge ' . $filetype . ' aus den Radar-Daten';
-                    echo PHP_EOL . $header . PHP_EOL . str_repeat('=', \strlen($header)) . PHP_EOL;
+                    echo PHP_EOL . $header . PHP_EOL . str_repeat('=', \mb_strlen($header)) . PHP_EOL;
                     if (empty($filename) || false === $filename) {
                         echo '-> Erzeugen des ' . $filetype . '-Videos in der Konfiguration deaktiviert' . PHP_EOL;
                     } else {
@@ -81,7 +81,7 @@ try {
                     }
                 } else {
                     $header = 'Lade Poster-Datei für das Video vom DWD Webserver';
-                    echo PHP_EOL . $header . PHP_EOL . str_repeat('=', \strlen($header)) . PHP_EOL;
+                    echo PHP_EOL . $header . PHP_EOL . str_repeat('=', \mb_strlen($header)) . PHP_EOL;
 
                     if (false === $value['posterURL']) {
                         echo PHP_EOL . '-> Download der Poster-Datei wird nicht benötigt' . PHP_EOL;

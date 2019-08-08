@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 /*
- *  RegenRadar Autoloader für neuthardwetter.de by Jens Dutzi - autoload.php
+ *  RegenRadar Generator aus DWD-Radarbilder from neuthardwetter.de by Jens Dutzi
  *
  *  @package    blog404de\RegenRadar
  *  @author     Jens Dutzi <jens.dutzi@tf-network.de>
  *  @copyright  Copyright (c) 2012-2019 Jens Dutzi (http://www.neuthardwetter.de)
  *  @license    https://github.com/Blog404DE/RegenRadarVideo/blob/master/LICENSE.md
- *  @version    3.2.0-stable
+ *  @version    3.2.1-stable
  *  @link       https://github.com/Blog404DE/RegenRadarVideo
  */
 
@@ -18,22 +20,24 @@ use Exception;
 /**
  * Class Network.
  */
-class Network {
+class Network
+{
     /**
      * Rardar-Datei herunterladen.
      *
-     * @param $localfile
-     * @param $remotefile
+     * @param string $localfile
+     * @param string $remotefile
      *
      * @throws Exception
      */
-    public function downloadRadarFile($localfile, $remotefile) {
+    public function downloadRadarFile(string $localfile, string $remotefile)
+    {
         try {
             echo PHP_EOL . 'Starte Download des Radar-Videos:' . PHP_EOL;
 
             // File-Handler öffnen
             $filehandler = fopen($localfile, 'w+');
-            if (!$filehandler) {
+            if (!\is_resource($filehandler)) {
                 throw new Exception(
                     'Filehandler für ' . $localfile . ' zum speichern des Downloads konnte nicht geöffnet werden ' .
                     '(URL: ' . basename($remotefile) . ')'
@@ -42,6 +46,10 @@ class Network {
 
             // Download initialisieren
             $curl = curl_init();
+            if (!\is_resource($curl)) {
+                throw new Exception('Initialisierung von libCurl fehlgeschlagen');
+            }
+
             curl_setopt_array(
                 $curl,
                 [
@@ -74,12 +82,13 @@ class Network {
     /**
      * Poster-Datei herunterladen.
      *
-     * @param $localfile
-     * @param $remotefile
+     * @param string $localfile
+     * @param string $remotefile
      *
      * @throws Exception
      */
-    public function downloadPosterFile($localfile, $remotefile) {
+    public function downloadPosterFile(string $localfile, string $remotefile)
+    {
         try {
             echo PHP_EOL . 'Starte Download der Poster-Grafik:' . PHP_EOL;
 
@@ -94,6 +103,10 @@ class Network {
 
             // Download initialisieren
             $curl = curl_init();
+            if (!\is_resource($curl)) {
+                throw new Exception('Initialisierung von libCurl fehlgeschlagen');
+            }
+
             curl_setopt_array(
                 $curl,
                 [
@@ -126,19 +139,22 @@ class Network {
     /**
      * Prüfe ob DWD VIdeo aktualisiert werden ,uss.
      *
-     * @param $localfile
-     * @param $remotefile
+     * @param string $localfile
+     * @param string $remotefile
      *
      * @throws
      *
      * @return bool
      */
-    public function checkDWDRadarVideoForUpdate($localfile, $remotefile) {
+    public function checkDWDRadarVideoForUpdate(string $localfile, string $remotefile): bool
+    {
         try {
-            $updateVideo = null;
-
             // Beginne Prüfung über den Zeitstempel des letzten Updates
             $curl = curl_init();
+            if (!\is_resource($curl)) {
+                throw new Exception('Initialisierung von libCurl fehlgeschlagen');
+            }
+
             curl_setopt_array(
                 $curl,
                 [
@@ -163,7 +179,7 @@ class Network {
             $info = curl_getinfo($curl);
 
             // Ermittle ob aktualisiert werden muss über den "Last-Modified"-Zeitstempel
-            $updateVideo = self::updateExists($localfile, $info);
+            $updateVideo = $this->updateExists($localfile, $info);
 
             // Schließe Verbindung zum Webserver
             curl_close($curl);
@@ -176,12 +192,13 @@ class Network {
     }
 
     /**
-     * @param $localfile
-     * @param $info
+     * @param string $localfile
+     * @param array  $info
      *
      * @return bool
      */
-    private function updateExists($localfile, $info): bool {
+    private function updateExists(string $localfile, array $info): bool
+    {
         $updateVideo = true;
 
         if (\array_key_exists('filetime', $info)) {
@@ -236,17 +253,18 @@ class Network {
      * cURL Download Progress darstellen
      * (lubCurl Callback-Funktion).
      *
-     * @param $resource
-     * @param $downloadSize [optional]
-     * @param $downloaded [optional]
-     * @param $uploadSize [optional]
-     * @param $uploaded [optional]
+     * @param resource $resource
+     * @param int      $downloadSize [optional]
+     * @param int      $downloaded   [optional]
+     * @param int      $uploadSize   [optional]
+     * @param int      $uploaded     [optional]
      *
      * @SuppressWarnings(PHPMD.UnusedPrivateMethod)
      *
      * @throws
      */
-    private function downloadProgress($resource, $downloadSize, $downloaded, $uploadSize, $uploaded) {
+    private function downloadProgress($resource, int $downloadSize, int $downloaded, int $uploadSize, int $uploaded)
+    {
         try {
             // Ressource vorhanden?
             if (!\is_resource($resource)) {
