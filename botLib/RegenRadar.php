@@ -169,19 +169,21 @@ class RegenRadar
     {
         try {
             // Poster-Datei prüfen
-            if (!empty($currentConfig['posterFile']) && false !== $currentConfig['posterFile']) {
-                if (!is_writable(\dirname($currentConfig['posterFile']))) {
+            $posterFile = \array_key_exists('poster', $currentConfig) ? $currentConfig['output']['poster'] : false;
+            if (!empty($posterFile) && false !== $posterFile) {
+                $posterDirectory = \dirname($posterFile);
+                if (!is_writable($posterDirectory)) {
                     throw new Exception(
                         'In Ziel-Datei Ordner ' .
-                        \dirname($currentConfig['posterFile']) .
+                        $posterDirectory .
                         ' kann keine Datei angelegt werden'
                     );
                 }
 
-                if (file_exists($currentConfig['posterFile'])) {
-                    if (!is_writable($currentConfig['posterFile'])) {
+                if (file_exists($posterFile)) {
+                    if (!is_writable($posterFile)) {
                         throw new Exception(
-                            'Benötigte Ziel-Datei ' . $currentConfig['posterFile'] . ' ist nicht überschreibbar'
+                            'Benötigte Ziel-Datei ' . $posterFile . ' ist nicht überschreibbar'
                         );
                     }
                 }
@@ -208,21 +210,19 @@ class RegenRadar
                 );
             }
 
-            foreach ($currentConfig['output'] as $format => $outputFile) {
+            foreach ($currentConfig['output'] as $outputFile) {
+                $outputFileDirectory = \dirname($outputFile);
                 if (false !== $outputFile) {
-                    if (!is_writable(\dirname($outputFile))) {
+                    if (!is_writable($outputFileDirectory)) {
                         throw new Exception(
-                            'In Ziel-Datei Ordner (Format: ' . $format . ') ' .
-                            \dirname($outputFile) .
-                            ' kann keine Datei angelegt werden'
+                            "In Ziel-Datei Ordner {$outputFileDirectory} kann keine Datei angelegt werden"
                         );
                     }
 
                     if (file_exists($outputFile)) {
                         if (!is_writable($outputFile)) {
                             throw new Exception(
-                                'Benötigte Ziel-Datei (Format: ' . $format . ') ' .
-                                $outputFile . ' ist nicht überschreibbar'
+                                "Benötigte Ziel-Datei {$outputFile} ist nicht überschreibbar"
                             );
                         }
                     }
