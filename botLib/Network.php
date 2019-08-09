@@ -94,7 +94,7 @@ class Network
 
             // File-Handler öffnen
             $filehandler = fopen($localfile, 'w+');
-            if (!$filehandler) {
+            if (!\is_resource($filehandler)) {
                 throw new Exception(
                     'Filehandler für ' . $localfile . ' zum speichern der Poster-Grafik konnte nicht geöffnet werden ' .
                     '(URL: ' . basename($remotefile) . ')'

@@ -16,7 +16,6 @@ declare(strict_types=1);
 namespace blog404de\RegenRadar;
 
 use Exception;
-use const PHP_EOL;
 
 /**
  * Hauptklasse für das erzeugen der Radar-Videos.
