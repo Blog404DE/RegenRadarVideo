@@ -23,23 +23,23 @@ use Exception;
 class Network
 {
     /**
-     * Rardar-Datei herunterladen.
+     * Datei herunterladen.
      *
      * @param string $localfile
      * @param string $remotefile
      *
      * @throws Exception
      */
-    public function downloadRadarFile(string $localfile, string $remotefile)
+    public function downloadFile(string $localfile, string $remotefile)
     {
         try {
-            echo PHP_EOL . 'Starte Download des Radar-Videos:' . PHP_EOL;
+            echo PHP_EOL . 'Starte Download der Datei ' . basename($localfile) . ':' . PHP_EOL;
 
             // File-Handler öffnen
             $filehandler = fopen($localfile, 'w+');
             if (!\is_resource($filehandler)) {
                 throw new Exception(
-                    'Filehandler für ' . $localfile . ' zum speichern des Downloads konnte nicht geöffnet werden ' .
+                    'Filehandler für ' . $localfile . ' zum speichern des Download konnte nicht geöffnet werden ' .
                     '(URL: ' . basename($remotefile) . ')'
                 );
             }
@@ -67,64 +67,7 @@ class Network
             // Datei herunterladen
             if (!curl_exec($curl)) {
                 throw new Exception(
-                    'Verbindung zum DWD-Webserver für die Prüfung des letzten Updates ist fehlgeschlagen ' .
-                    '(URL: ' . basename($remotefile) . ')'
-                );
-            }
-
-            echo PHP_EOL . '-> Download abgeschlossen' . PHP_EOL;
-        } catch (Exception $e) {
-            // Fehler an Hauptklasse weitergeben
-            throw $e;
-        }
-    }
-
-    /**
-     * Poster-Datei herunterladen.
-     *
-     * @param string $localfile
-     * @param string $remotefile
-     *
-     * @throws Exception
-     */
-    public function downloadPosterFile(string $localfile, string $remotefile)
-    {
-        try {
-            echo PHP_EOL . 'Starte Download der Poster-Grafik:' . PHP_EOL;
-
-            // File-Handler öffnen
-            $filehandler = fopen($localfile, 'w+');
-            if (!\is_resource($filehandler)) {
-                throw new Exception(
-                    'Filehandler für ' . $localfile . ' zum speichern der Poster-Grafik konnte nicht geöffnet werden ' .
-                    '(URL: ' . basename($remotefile) . ')'
-                );
-            }
-
-            // Download initialisieren
-            $curl = curl_init();
-            if (!\is_resource($curl)) {
-                throw new Exception('Initialisierung von libCurl fehlgeschlagen');
-            }
-
-            curl_setopt_array(
-                $curl,
-                [
-                    CURLOPT_URL => $remotefile,
-                    CURLOPT_RETURNTRANSFER => true,
-                    CURLOPT_HEADER => false,
-                    CURLOPT_PROGRESSFUNCTION => [$this, 'downloadProgress'],
-                    CURLOPT_NOPROGRESS => false,
-                    CURLOPT_BINARYTRANSFER => true,
-                    CURLOPT_FOLLOWLOCATION => true,
-                    CURLOPT_FILE => $filehandler,
-                ]
-            );
-
-            // Datei herunterladen
-            if (!curl_exec($curl)) {
-                throw new Exception(
-                    'Verbindung zum DWD-Webserver für die Prüfung des letzten Updates ist fehlgeschlagen ' .
+                    'Verbindung zum DWD-Webserver für die Prüfung des Download ist fehlgeschlagen ' .
                     '(URL: ' . basename($remotefile) . ')'
                 );
             }
