@@ -8,10 +8,10 @@ root = true
 end_of_line = lf
 insert_final_newline = true
 trim_trailing_whitespace = true
-
-[*.{php,twig,yml}]
-indent_style = space
 indent_size = 4
+
+[*.{php,twig,yml,sh}]
+indent_style = space
 
 [*.{html5,svg,min.css,min.js}]
 insert_final_newline = false

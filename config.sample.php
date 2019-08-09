@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 /*
- *  RegenRadar Autoloader für neuthardwetter.de by Jens Dutzi - autoload.php
+ *  RegenRadar Generator aus DWD-Radarbilder from neuthardwetter.de by Jens Dutzi
  *
  *  @package    blog404de\RegenRadar
  *  @author     Jens Dutzi <jens.dutzi@tf-network.de>
  *  @copyright  Copyright (c) 2012-2019 Jens Dutzi (http://www.neuthardwetter.de)
  *  @license    https://github.com/Blog404DE/RegenRadarVideo/blob/master/LICENSE.md
- *  @version    3.2.0-stable
+ *  @version    3.2.1-stable
  *  @link       https://github.com/Blog404DE/RegenRadarVideo
  */
 
