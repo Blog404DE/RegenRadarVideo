@@ -1,5 +1,11 @@
 # Changelog
 
+2019-08-10, 3.2.1 stable
+----------
+* Bugfix: Fehlerhafte Prüfung ob Posterdatei geschrieben werden kann korriigert
+* Code-Optimierungen (doppelter Code vereinfacht)
+* Travis-CI Unterstützung angepasst
+
 2019-08-06, 3.2.0 stable
 ----------
 * Kleinere Änderung beim Ladeverhalten der Klassen
