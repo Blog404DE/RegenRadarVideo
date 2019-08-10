@@ -66,7 +66,7 @@ try {
         }
         if ($needRebuild) {
             // Download des Radar-Videos
-            $regenradarBot->network->downloadRadarFile($localVideoFile, $value['remoteURL']);
+            $regenradarBot->network->downloadFile($localVideoFile, $value['remoteURL']);
 
             // Erzeuge die Videos
             foreach ($value['output'] as $filetype => $filename) {
@@ -86,7 +86,7 @@ try {
                     if (false === $value['posterURL']) {
                         echo PHP_EOL . '-> Download der Poster-Datei wird nicht benötigt' . PHP_EOL;
                     } else {
-                        $regenradarBot->network->downloadPosterFile($filename, $value['posterURL']);
+                        $regenradarBot->network->downloadFile($filename, $value['posterURL']);
                     }
                 }
             }
