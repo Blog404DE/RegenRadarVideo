@@ -9,7 +9,7 @@ declare(strict_types=1);
  *  @author     Jens Dutzi <jens.dutzi@tf-network.de>
  *  @copyright  Copyright (c) 2012-2019 Jens Dutzi (http://www.neuthardwetter.de)
  *  @license    https://github.com/Blog404DE/RegenRadarVideo/blob/master/LICENSE.md
- *  @version    3.2.1-stable
+ *  @version    3.2.2-unstable
  *  @link       https://github.com/Blog404DE/RegenRadarVideo
  */
 
@@ -20,8 +20,7 @@ use Exception;
 /**
  * Hauptklasse für das erzeugen der Radar-Videos.
  */
-class RegenRadar
-{
+class RegenRadar {
     /**
      * Netzwerk-Klasse.
      *
@@ -37,8 +36,7 @@ class RegenRadar
      *
      * @throws Exception
      */
-    public function __construct(array $config, array $converter)
-    {
+    public function __construct(array $config, array $converter) {
         try {
             // Prüfe ob libCurl vorhanden ist
             if (!\extension_loaded('curl')) {
@@ -89,8 +87,7 @@ class RegenRadar
      *
      * @return string
      */
-    public function createRadarVideo(string $filetype, array $converter, array $config): string
-    {
+    public function createRadarVideo(string $filetype, array $converter, array $config): string {
         try {
             // Animation neu erzeugen
             $tmpRegenAnimation = tempnam(sys_get_temp_dir(), 'RegenRadar');
@@ -140,8 +137,7 @@ class RegenRadar
      *
      * @throws Exception
      */
-    public function saveRadarVideo(string $tmpRegenAnimation, string $filename)
-    {
+    public function saveRadarVideo(string $tmpRegenAnimation, string $filename) {
         try {
             if (!rename($tmpRegenAnimation, $filename)) {
                 throw new Exception('Fehler beim verschieben des erzeugten Videos');
@@ -165,8 +161,7 @@ class RegenRadar
      *
      * @throws Exception
      */
-    private function checkPosterFile(array $currentConfig)
-    {
+    private function checkPosterFile(array $currentConfig) {
         try {
             // Poster-Datei prüfen
             $posterFile = \array_key_exists('poster', $currentConfig) ? $currentConfig['output']['poster'] : false;
@@ -201,8 +196,7 @@ class RegenRadar
      *
      * @throws Exception
      */
-    private function checkFolders(array $currentConfig)
-    {
+    private function checkFolders(array $currentConfig) {
         try {
             if (!is_writable($currentConfig['localFolder'])) {
                 throw new Exception(

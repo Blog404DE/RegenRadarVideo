@@ -6,7 +6,7 @@ $header = <<<EOF
  @author     Jens Dutzi <jens.dutzi@tf-network.de>
  @copyright  Copyright (c) 2012-2019 Jens Dutzi (http://www.neuthardwetter.de)
  @license    https://github.com/Blog404DE/RegenRadarVideo/blob/master/LICENSE.md
- @version    3.2.1-stable
+ @version    3.2.2-unstable
  @link       https://github.com/Blog404DE/RegenRadarVideo
 EOF;
 
@@ -41,6 +41,14 @@ return PhpCsFixer\Config::create()
         'concat_space' => [
             'spacing' => 'one'
         ],
+		'cast_spaces' => [
+            'space' => 'none'
+        ],
+		'braces' => [
+			'position_after_control_structures' => 'same',
+			'position_after_functions_and_oop_constructs' => 'same',
+			'position_after_anonymous_constructs' => 'same'
+		],
         'backtick_to_shell_exec' => true,
         'mb_str_functions' => true,
         'no_php4_constructor' => true,
