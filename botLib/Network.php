@@ -24,9 +24,6 @@ class Network {
     /**
      * Datei herunterladen.
      *
-     * @param string $localfile
-     * @param string $remotefile
-     *
      * @throws Exception
      */
     public function downloadFile(string $localfile, string $remotefile) {
@@ -80,12 +77,7 @@ class Network {
     /**
      * Prüfe ob DWD VIdeo aktualisiert werden ,uss.
      *
-     * @param string $localfile
-     * @param string $remotefile
-     *
      * @throws
-     *
-     * @return bool
      */
     public function checkDWDRadarVideoForUpdate(string $localfile, string $remotefile): bool {
         try {
@@ -131,12 +123,6 @@ class Network {
         }
     }
 
-    /**
-     * @param string $localfile
-     * @param array  $info
-     *
-     * @return bool
-     */
     private function updateExists(string $localfile, array $info): bool {
         $updateVideo = true;
 

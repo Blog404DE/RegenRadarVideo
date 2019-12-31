@@ -31,9 +31,6 @@ class RegenRadar {
     /**
      * Prüfe System-Vorraussetzungen.
      *
-     * @param array $config
-     * @param array $converter
-     *
      * @throws Exception
      */
     public function __construct(array $config, array $converter) {
@@ -79,13 +76,7 @@ class RegenRadar {
     /**
      * Erzeuge Video aus Radar-Bilder.
      *
-     * @param string $filetype
-     * @param array  $converter
-     * @param array  $config
-     *
      * @throws Exception
-     *
-     * @return string
      */
     public function createRadarVideo(string $filetype, array $converter, array $config): string {
         try {
@@ -111,6 +102,8 @@ class RegenRadar {
                     '-c:v ' . escapeshellarg($exportFormat) . ' -r 30 -an -b:v 600k -pix_fmt yuv420p ' .
                     '-f ' . escapeshellarg($filetype) . ' ' . escapeshellarg($tmpRegenAnimation);
 
+                $exitval = '';
+                $output = -1;
                 exec($cmd, $output, $exitval);
                 if ('' === $output || 0 !== $exitval) {
                     throw new Exception('Fehler beim ausführen des Konvertierungs-Auftrags');
@@ -131,9 +124,6 @@ class RegenRadar {
 
     /**
      * Kopiere erzeugte Video/Animation.
-     *
-     * @param string $tmpRegenAnimation
-     * @param string $filename
      *
      * @throws Exception
      */
@@ -156,8 +146,6 @@ class RegenRadar {
 
     /**
      * Prüfe Poster-Datei für das jeweilige Radar-Set.
-     *
-     * @param array $currentConfig
      *
      * @throws Exception
      */
@@ -191,8 +179,6 @@ class RegenRadar {
 
     /**
      * Prüfe Ordner für das jeweilige Radar-Set.
-     *
-     * @param array $currentConfig
      *
      * @throws Exception
      */
