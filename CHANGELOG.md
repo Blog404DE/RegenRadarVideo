@@ -1,5 +1,9 @@
 # Changelog
 
+2019-08-10, 3.2.2 stable
+----------
+* Bugfix: potentielle Notices während des Programmablaufs entfernt
+
 2019-08-10, 3.2.1 stable
 ----------
 * Bugfix: Fehlerhafte Prüfung ob Posterdatei geschrieben werden kann korriigert
@@ -17,12 +21,12 @@
 2018-01-03, 3.1.0 stable
 ----------
 * Copyright-String angepasst
-* Noch kleinere Anpassungen an der Formatierung 
+* Noch kleinere Anpassungen an der Formatierung
 * *Bitte den Hinweis unter 3.0.0 beachten!*
-  
+
 2017-12-29, 3.0.0 develop
 ---------
-* Komplette Umstellung des Scripts auf eine alternative Download-Methode, nachdem der DWD den Grundversorgungs-Server 
+* Komplette Umstellung des Scripts auf eine alternative Download-Methode, nachdem der DWD den Grundversorgungs-Server
 demnächst schließen wird und im Rahmen der OpenData-Programm die einzelnen Radar-Bilder nicht mehr zur Verfügung stehen
 * Überarbeitete Konfigurationsdatei - *unbedingt beachten!*
 * Neue Systemvorrausetzungen (libCurl Support für PHP)
@@ -39,7 +43,7 @@ demnächst schließen wird und im Rahmen der OpenData-Programm die einzelnen Rad
 
 2017-07-08, 1.6.0 develop
 ----------
-* Aufräumen des Download-Ordner überarbeitet 
+* Aufräumen des Download-Ordner überarbeitet
 
 2017-03-04, 1.5.1 develop
 ----------

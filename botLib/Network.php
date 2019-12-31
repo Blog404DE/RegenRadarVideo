@@ -9,7 +9,7 @@ declare(strict_types=1);
  *  @author     Jens Dutzi <jens.dutzi@tf-network.de>
  *  @copyright  Copyright (c) 2012-2019 Jens Dutzi (http://www.neuthardwetter.de)
  *  @license    https://github.com/Blog404DE/RegenRadarVideo/blob/master/LICENSE.md
- *  @version    3.2.1-stable
+ *  @version    3.2.2-unstable
  *  @link       https://github.com/Blog404DE/RegenRadarVideo
  */
 
@@ -20,18 +20,13 @@ use Exception;
 /**
  * Class Network.
  */
-class Network
-{
+class Network {
     /**
      * Datei herunterladen.
      *
-     * @param string $localfile
-     * @param string $remotefile
-     *
      * @throws Exception
      */
-    public function downloadFile(string $localfile, string $remotefile)
-    {
+    public function downloadFile(string $localfile, string $remotefile) {
         try {
             echo PHP_EOL . 'Starte Download der Datei ' . basename($localfile) . ':' . PHP_EOL;
 
@@ -82,15 +77,9 @@ class Network
     /**
      * Prüfe ob DWD VIdeo aktualisiert werden ,uss.
      *
-     * @param string $localfile
-     * @param string $remotefile
-     *
      * @throws
-     *
-     * @return bool
      */
-    public function checkDWDRadarVideoForUpdate(string $localfile, string $remotefile): bool
-    {
+    public function checkDWDRadarVideoForUpdate(string $localfile, string $remotefile): bool {
         try {
             // Beginne Prüfung über den Zeitstempel des letzten Updates
             $curl = curl_init();
@@ -134,14 +123,7 @@ class Network
         }
     }
 
-    /**
-     * @param string $localfile
-     * @param array  $info
-     *
-     * @return bool
-     */
-    private function updateExists(string $localfile, array $info): bool
-    {
+    private function updateExists(string $localfile, array $info): bool {
         $updateVideo = true;
 
         if (\array_key_exists('filetime', $info)) {
@@ -172,8 +154,8 @@ class Network
             ;
 
             // Falle zurück auf Prüfung über den Dateinamen
-            $remotefilesize = (int) $info['download_content_length'];
-            $localfilesize = (int) filesize($localfile);
+            $remotefilesize = (int)$info['download_content_length'];
+            $localfilesize = (int)filesize($localfile);
 
             echo "\t-> Entfernte Datei: " . round($remotefilesize / 1024) . ' kBytes' . PHP_EOL;
             echo "\t-> Lokale Datei: " . round($localfilesize / 1024) . ' kBytes ' . PHP_EOL;
@@ -206,8 +188,7 @@ class Network
      *
      * @throws
      */
-    private function downloadProgress($resource, int $downloadSize, int $downloaded, int $uploadSize, int $uploaded)
-    {
+    private function downloadProgress($resource, int $downloadSize, int $downloaded, int $uploadSize, int $uploaded) {
         try {
             // Ressource vorhanden?
             if (!\is_resource($resource)) {

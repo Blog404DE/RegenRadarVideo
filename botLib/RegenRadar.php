@@ -9,7 +9,7 @@ declare(strict_types=1);
  *  @author     Jens Dutzi <jens.dutzi@tf-network.de>
  *  @copyright  Copyright (c) 2012-2019 Jens Dutzi (http://www.neuthardwetter.de)
  *  @license    https://github.com/Blog404DE/RegenRadarVideo/blob/master/LICENSE.md
- *  @version    3.2.1-stable
+ *  @version    3.2.2-unstable
  *  @link       https://github.com/Blog404DE/RegenRadarVideo
  */
 
@@ -20,8 +20,7 @@ use Exception;
 /**
  * Hauptklasse für das erzeugen der Radar-Videos.
  */
-class RegenRadar
-{
+class RegenRadar {
     /**
      * Netzwerk-Klasse.
      *
@@ -32,13 +31,9 @@ class RegenRadar
     /**
      * Prüfe System-Vorraussetzungen.
      *
-     * @param array $config
-     * @param array $converter
-     *
      * @throws Exception
      */
-    public function __construct(array $config, array $converter)
-    {
+    public function __construct(array $config, array $converter) {
         try {
             // Prüfe ob libCurl vorhanden ist
             if (!\extension_loaded('curl')) {
@@ -81,16 +76,9 @@ class RegenRadar
     /**
      * Erzeuge Video aus Radar-Bilder.
      *
-     * @param string $filetype
-     * @param array  $converter
-     * @param array  $config
-     *
      * @throws Exception
-     *
-     * @return string
      */
-    public function createRadarVideo(string $filetype, array $converter, array $config): string
-    {
+    public function createRadarVideo(string $filetype, array $converter, array $config): string {
         try {
             // Animation neu erzeugen
             $tmpRegenAnimation = tempnam(sys_get_temp_dir(), 'RegenRadar');
@@ -114,6 +102,8 @@ class RegenRadar
                     '-c:v ' . escapeshellarg($exportFormat) . ' -r 30 -an -b:v 600k -pix_fmt yuv420p ' .
                     '-f ' . escapeshellarg($filetype) . ' ' . escapeshellarg($tmpRegenAnimation);
 
+                $exitval = '';
+                $output = -1;
                 exec($cmd, $output, $exitval);
                 if ('' === $output || 0 !== $exitval) {
                     throw new Exception('Fehler beim ausführen des Konvertierungs-Auftrags');
@@ -135,13 +125,9 @@ class RegenRadar
     /**
      * Kopiere erzeugte Video/Animation.
      *
-     * @param string $tmpRegenAnimation
-     * @param string $filename
-     *
      * @throws Exception
      */
-    public function saveRadarVideo(string $tmpRegenAnimation, string $filename)
-    {
+    public function saveRadarVideo(string $tmpRegenAnimation, string $filename) {
         try {
             if (!rename($tmpRegenAnimation, $filename)) {
                 throw new Exception('Fehler beim verschieben des erzeugten Videos');
@@ -161,12 +147,9 @@ class RegenRadar
     /**
      * Prüfe Poster-Datei für das jeweilige Radar-Set.
      *
-     * @param array $currentConfig
-     *
      * @throws Exception
      */
-    private function checkPosterFile(array $currentConfig)
-    {
+    private function checkPosterFile(array $currentConfig) {
         try {
             // Poster-Datei prüfen
             $posterFile = \array_key_exists('poster', $currentConfig) ? $currentConfig['output']['poster'] : false;
@@ -197,12 +180,9 @@ class RegenRadar
     /**
      * Prüfe Ordner für das jeweilige Radar-Set.
      *
-     * @param array $currentConfig
-     *
      * @throws Exception
      */
-    private function checkFolders(array $currentConfig)
-    {
+    private function checkFolders(array $currentConfig) {
         try {
             if (!is_writable($currentConfig['localFolder'])) {
                 throw new Exception(
