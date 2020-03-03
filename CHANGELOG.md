@@ -2,7 +2,6 @@
 
 2020-03-03, 3.3.0 stable
 ----------
-
 * PHP Strict-Mode ausgerollt inkl. Funktions-Rückgabeparameter
 * Kleinere Optimierungen
 * Entfernung von PHP 7.0.x Unterstützung (!)

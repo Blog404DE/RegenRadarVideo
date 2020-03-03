@@ -16,6 +16,7 @@ declare(strict_types=1);
 namespace blog404de\RegenRadar;
 
 use Exception;
+use RuntimeException;
 
 /**
  * Hauptklasse für das erzeugen der Radar-Videos.
@@ -31,31 +32,30 @@ class RegenRadar {
     /**
      * Prüfe System-Vorraussetzungen.
      *
+     * @param array $config
+     * @param array $converter
+     *
      * @throws Exception
      */
     public function __construct(array $config, array $converter) {
         try {
             // Prüfe ob libCurl vorhanden ist
             if (!\extension_loaded('curl')) {
-                throw new Exception(
+                throw new RuntimeException(
                     'libCurl bzw. die das libCurl-PHP Modul steht nicht zur Verfügung.'
                 );
             }
 
             // Prüfe Vorraussetzungen
-            if (false !== $converter['video']) {
-                if (!is_executable($converter['video'])) {
-                    throw new Exception(
-                        'ffmpeg/libavtools Binary steht unter ' . $converter['video'] . ' nicht zur verfügung.'
-                    );
-                }
+            if ((false !== $converter['video']) && !is_executable($converter['video'])) {
+                throw new RuntimeException(
+                    'ffmpeg/libavtools Binary steht unter ' . $converter['video'] . ' nicht zur verfügung.'
+                );
             }
-            if (false !== $converter['gif']) {
-                if ('copy' !== $converter['gif']) {
-                    throw new Exception(
-                        'Für die GIF-Konvertieren steht ausschließlich der Weg  "Copy" zur Verfügung.'
-                    );
-                }
+            if ((false !== $converter['gif']) && 'copy' !== $converter['gif']) {
+                throw new RuntimeException(
+                    'Für die GIF-Konvertieren steht ausschließlich der Weg  "Copy" zur Verfügung.'
+                );
             }
 
             // Prüfe Existenz der lokalen Verzeichnisse für die einzelnen Radar-Aufnahmen existieren
@@ -76,7 +76,13 @@ class RegenRadar {
     /**
      * Erzeuge Video aus Radar-Bilder.
      *
+     * @param string $filetype
+     * @param array  $converter
+     * @param array  $config
+     *
      * @throws Exception
+     *
+     * @return string
      */
     public function createRadarVideo(string $filetype, array $converter, array $config): string {
         try {
@@ -92,6 +98,7 @@ class RegenRadar {
                 $exportFormat = 'libx264';
 
                 // Soll WebM erzeugt werden?
+                /** @noinspection NotOptimalIfConditionsInspection */
                 if ('webm' === $filetype) {
                     $exportFormat = 'libvpx';
                 }
@@ -106,7 +113,7 @@ class RegenRadar {
                 $output = -1;
                 exec($cmd, $output, $exitval);
                 if ('' === $output || 0 !== $exitval) {
-                    throw new Exception('Fehler beim ausführen des Konvertierungs-Auftrags');
+                    throw new RuntimeException('Fehler beim ausführen des Konvertierungs-Auftrags');
                 }
             } elseif ('gif' === $filetype) {
                 echo PHP_EOL . 'Starte kopieren des ' . $filetype . '-Video' . PHP_EOL;
@@ -116,7 +123,7 @@ class RegenRadar {
             }
 
             return $tmpRegenAnimation;
-        } catch (Exception $e) {
+        } catch (RuntimeException | Exception $e) {
             // Fehler an Hauptklasse weitergeben
             throw $e;
         }
@@ -125,20 +132,23 @@ class RegenRadar {
     /**
      * Kopiere erzeugte Video/Animation.
      *
+     * @param string $tmpRegenAnimation
+     * @param string $filename
+     *
      * @throws Exception
      */
-    public function saveRadarVideo(string $tmpRegenAnimation, string $filename) {
+    public function saveRadarVideo(string $tmpRegenAnimation, string $filename): void {
         try {
             if (!rename($tmpRegenAnimation, $filename)) {
-                throw new Exception('Fehler beim verschieben des erzeugten Videos');
+                throw new RuntimeException('Fehler beim verschieben des erzeugten Videos');
             }
 
             if (!chmod($filename, 0644)) {
-                throw new Exception('Fehler beim setzen der Datei-Rechte für das erzeugten Videos');
+                throw new RuntimeException('Fehler beim setzen der Datei-Rechte für das erzeugten Videos');
             }
 
             echo '-> ' . $filename . ' wurde erzeugt.' . PHP_EOL;
-        } catch (Exception $e) {
+        } catch (RuntimeException | Exception $e) {
             // Fehler an Hauptklasse weitergeben
             throw $e;
         }
@@ -147,31 +157,31 @@ class RegenRadar {
     /**
      * Prüfe Poster-Datei für das jeweilige Radar-Set.
      *
+     * @param array $currentConfig
+     *
      * @throws Exception
      */
-    private function checkPosterFile(array $currentConfig) {
+    private function checkPosterFile(array $currentConfig): void {
         try {
             // Poster-Datei prüfen
             $posterFile = \array_key_exists('poster', $currentConfig) ? $currentConfig['output']['poster'] : false;
             if (!empty($posterFile) && false !== $posterFile) {
                 $posterDirectory = \dirname($posterFile);
                 if (!is_writable($posterDirectory)) {
-                    throw new Exception(
+                    throw new RuntimeException(
                         'In Ziel-Datei Ordner ' .
                         $posterDirectory .
                         ' kann keine Datei angelegt werden'
                     );
                 }
 
-                if (file_exists($posterFile)) {
-                    if (!is_writable($posterFile)) {
-                        throw new Exception(
-                            'Benötigte Ziel-Datei ' . $posterFile . ' ist nicht überschreibbar'
-                        );
-                    }
+                if (file_exists($posterFile) && !is_writable($posterFile)) {
+                    throw new RuntimeException(
+                        'Benötigte Ziel-Datei ' . $posterFile . ' ist nicht überschreibbar'
+                    );
                 }
             }
-        } catch (Exception $e) {
+        } catch (RuntimeException | Exception $e) {
             // Fehler an Hauptklasse weitergeben
             throw $e;
         }
@@ -180,12 +190,14 @@ class RegenRadar {
     /**
      * Prüfe Ordner für das jeweilige Radar-Set.
      *
+     * @param array $currentConfig
+     *
      * @throws Exception
      */
-    private function checkFolders(array $currentConfig) {
+    private function checkFolders(array $currentConfig): void {
         try {
             if (!is_writable($currentConfig['localFolder'])) {
-                throw new Exception(
+                throw new RuntimeException(
                     'Benötigte Verzeichnisse ' . $currentConfig['localFolder'] . ' ist nicht beschreibbar'
                 );
             }
@@ -194,24 +206,22 @@ class RegenRadar {
                 $outputFileDirectory = \dirname($outputFile);
                 if (false !== $outputFile) {
                     if (!is_writable($outputFileDirectory)) {
-                        throw new Exception(
+                        throw new RuntimeException(
                             "In Ziel-Datei Ordner {$outputFileDirectory} kann keine Datei angelegt werden"
                         );
                     }
 
-                    if (file_exists($outputFile)) {
-                        if (!is_writable($outputFile)) {
-                            throw new Exception(
-                                "Benötigte Ziel-Datei {$outputFile} ist nicht überschreibbar"
-                            );
-                        }
+                    if (file_exists($outputFile) && !is_writable($outputFile)) {
+                        throw new RuntimeException(
+                            "Benötigte Ziel-Datei {$outputFile} ist nicht überschreibbar"
+                        );
                     }
                 }
             }
 
             // Filestats-Cache zurücksetzen um Änderungen zu übernehmen
             clearstatcache();
-        } catch (Exception $e) {
+        } catch (RuntimeException | Exception $e) {
             // Fehler an Hauptklasse weitergeben
             throw $e;
         }
