@@ -1,15 +1,14 @@
 #!/usr/bin/env php
 <?php
-/**
- * DWD-Radar Video Konverter für neuthardwetter.de by Jens Dutzi - RegenRadar.php.
+/*
+ *  RegenRadar Generator aus DWD-Radarbilder from neuthardwetter.de by Jens Dutzi
  *
- * @author     Jens Dutzi <jens.dutzi@tf-network.de>
- * @copyright  Copyright (c) 2012-2018 Jens Dutzi (http://www.neuthardwetter.de)
- * @license    https://github.com/Blog404DE/RegenRadarVideo/blob/master/LICENSE.md
- *
- * @version    3.1.5-stable
- *
- * @see       https://github.com/Blog404DE/RegenRadarVideo
+ *  @package    blog404de\RegenRadar
+ *  @author     Jens Dutzi <jens.dutzi@tf-network.de>
+ *  @copyright  Copyright (c) 2012-2020 Jens Dutzi (http://www.neuthardwetter.de)
+ *  @license    https://github.com/Blog404DE/RegenRadarVideo/blob/master/LICENSE.md
+ *  @version    3.3.0
+ *  @link       https://github.com/Blog404DE/RegenRadarVideo
  */
 use blog404de\RegenRadar\RegenRadar;
 
@@ -22,7 +21,7 @@ try {
     if (is_readable(__DIR__ . '/config.local.php')) {
         require_once __DIR__ . '/config.local.php';
     } else {
-        throw new Exception(
+        throw new \RuntimeException(
             "Konfigurationsdatei 'config.local.php' existiert nicht. Zur Konfiguration lesen Sie README.md"
         );
     }
@@ -48,18 +47,20 @@ try {
 
         // Prüfe DWD Video nach potentiellen Updates
         echo 'Prüfe ob Update des Videos notwendig ist:' . PHP_EOL;
-        if (file_exists($localVideoFile) && !$value['forceRebuild']) {
-            $needRebuild = $regenradarBot->network->checkDWDRadarVideoForUpdate($localVideoFile, $value['remoteURL']);
-        } elseif ($value['forceRebuild']) {
-            echo '-> Update des Videos ist wurde erzwungen durch die Konfigurationsdatei' . PHP_EOL;
-            $needRebuild = true;
+        if (file_exists($localVideoFile)) {
+            if (!$value['forceRebuild']) {
+                $needRebuild = $regenradarBot->network->checkDWDRadarVideoForUpdate($localVideoFile, $value['remoteURL']);
+            } else {
+                echo '-> Update des Videos ist wurde erzwungen durch die Konfigurationsdatei' . PHP_EOL;
+                $needRebuild = true;
+            }
         } else {
             echo '-> Update des Videos ist notwendig, da noch keine lokale Datei existiert' . PHP_EOL;
             $needRebuild = true;
         }
 
         if (null === $needRebuild) {
-            throw new Exception(
+            throw new \RuntimeException(
                 'Ermitteln des Zeitpunkt des letzten Updates ' .
                 'für das Radar-Videos ' . basename($localVideoFile) . ' fehlgeschlagen'
             );
@@ -94,7 +95,7 @@ try {
 
         echo PHP_EOL . '... Auftrag ausgeführt!' . PHP_EOL . PHP_EOL;
     }
-} catch (Exception $e) {
+} catch (RuntimeException | \Exception $e) {
     // Fehler-Handling
     fwrite(STDERR, 'Fataler Fehler: ' . $e->getFile() . ':' . $e->getLine() . ' - ' . $e->getMessage());
     exit(-1);
