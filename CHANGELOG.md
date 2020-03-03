@@ -1,10 +1,11 @@
 # Changelog
 
-2020-03-03, 3.3.0 stable
+2020-03-03, 3.3.1 stable
 ----------
 * PHP Strict-Mode ausgerollt inkl. Funktions-Rückgabeparameter
 * Kleinere Optimierungen
 * Entfernung von PHP 7.0.x Unterstützung (!)
+* Bugfix: bei deaktiviertem Export-Typ führte zu einem Fehler ($output["xyz"] = false)
 
 2019-08-10, 3.2.2 stable
 ----------
