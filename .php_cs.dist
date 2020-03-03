@@ -4,9 +4,9 @@ $header = <<<EOF
 
  @package    blog404de\RegenRadar
  @author     Jens Dutzi <jens.dutzi@tf-network.de>
- @copyright  Copyright (c) 2012-2019 Jens Dutzi (http://www.neuthardwetter.de)
+ @copyright  Copyright (c) 2012-2020 Jens Dutzi (http://www.neuthardwetter.de)
  @license    https://github.com/Blog404DE/RegenRadarVideo/blob/master/LICENSE.md
- @version    3.2.2-unstable
+ @version    3.3.0
  @link       https://github.com/Blog404DE/RegenRadarVideo
 EOF;
 
@@ -52,7 +52,15 @@ return PhpCsFixer\Config::create()
         'backtick_to_shell_exec' => true,
         'mb_str_functions' => true,
         'no_php4_constructor' => true,
-        'simplified_null_return' => true
+        'simplified_null_return' => true,
+        'phpdoc_to_comment' => false,
+        'phpdoc_add_missing_param_annotation' => true,
+        'phpdoc_order' => true,
+        'phpdoc_types_order' => [
+             'null_adjustment' => 'always_last',
+             'sort_algorithm' => 'none',
+        ],
+        'no_superfluous_phpdoc_tags' => false
     ])
     ->setFinder($finder)
     ->setRiskyAllowed(true)

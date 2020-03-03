@@ -7,9 +7,9 @@ declare(strict_types=1);
  *
  *  @package    blog404de\RegenRadar
  *  @author     Jens Dutzi <jens.dutzi@tf-network.de>
- *  @copyright  Copyright (c) 2012-2019 Jens Dutzi (http://www.neuthardwetter.de)
+ *  @copyright  Copyright (c) 2012-2020 Jens Dutzi (http://www.neuthardwetter.de)
  *  @license    https://github.com/Blog404DE/RegenRadarVideo/blob/master/LICENSE.md
- *  @version    3.2.2-unstable
+ *  @version    3.3.0
  *  @link       https://github.com/Blog404DE/RegenRadarVideo
  */
 
