@@ -139,5 +139,6 @@ Die anzupassenden Konfigurationsparameter in der *config.local.php* lauten wie f
 --
 ##### Lizenz-Information:
 
-Copyright Jens Dutzi 2015-2019 / Stand: 07.08.2019 / Dieses Werk ist lizenziert unter einer [MIT Lizenz](http://opensource.org/licenses/mit-license.php)
+Copyright Jens Dutzi 2015-2020 / Stand: 20.10.2020 / Dieses Werk ist lizenziert unter einer [MIT Lizenz]
+(http://opensource.org/licenses/mit-license.php)
 
