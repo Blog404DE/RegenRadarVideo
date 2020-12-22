@@ -84,7 +84,7 @@ jobs:
 
             - name: phpmd
               run: |
-                phpmd getWetterWarnung.php text cleancode,codesize,controversial,design,naming,unusedcode
+                phpmd genRegenRadar.php text cleancode,codesize,controversial,design,naming,unusedcode
                 phpmd botLib/ text cleancode,codesize,controversial,design,naming,unusedcode
 
             - name: phpcpd
