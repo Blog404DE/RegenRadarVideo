@@ -98,5 +98,6 @@ try {
 } catch (RuntimeException | \Exception $e) {
     // Fehler-Handling
     fwrite(STDERR, 'Fataler Fehler: ' . $e->getFile() . ':' . $e->getLine() . ' - ' . $e->getMessage());
+
     exit(-1);
 }

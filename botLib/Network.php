@@ -165,8 +165,7 @@ class Network {
             }
         } elseif (\array_key_exists('download_content_length', $info)) {
             // Wurde Update-Prüfung durchgeführt?
-            echo
-                "\t** WARNUNG: Upload-Zeitstempel ist nicht vorhanden " .
+            echo "\t** WARNUNG: Upload-Zeitstempel ist nicht vorhanden " .
                 '(Prüfe auf Veränderung der Dateigröße) ** ' . PHP_EOL
             ;
 
