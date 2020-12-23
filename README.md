@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/Blog404DE/RegenRadarVideo.svg?branch=master)](https://travis-ci.org/Blog404DE/RegenRadarVideo)
+![PHP CI](https://github.com/Blog404DE/RegenRadarVideo/workflows/PHP%20CI/badge.svg) [![GitHub release](https://img.shields.io/github/release/Blog404DE/RegenRadarVideo.svg?style=square)](https://github.com/Blog404DE/RegenRadarVideo) [![license](https://img.shields.io/github/license/Blog404DE/RegenRadarVideo.svg?style=square)](https://github.com/Blog404DE/RegenRadarVideo)
 
 # Regen-Radar Script
 
