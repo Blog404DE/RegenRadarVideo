@@ -9,7 +9,7 @@ on:
         tags:
             - '*'
     schedule:
-        - cron: 0 14 * * SAT
+        - cron: 0 14 * * THU
 
 jobs:
     compatiblity-check:
@@ -44,14 +44,14 @@ jobs:
               run: composer validate
 
             - name: Install dependencies
-              run: composer install --prefer-dist --no-progress --no-suggest
+              run: composer install --prefer-dist --no-progress
 
             - name: Check the coding style
               run: |
-                ./vendor/bin/phpcf -t 7.1 genRegenRadar.php config.sample.php ./botLib
-                ./vendor/bin/phpcf -t 7.2 genRegenRadar.php config.sample.php ./botLib
-                ./vendor/bin/phpcf -t 7.3 genRegenRadar.php config.sample.php ./botLib
-                ./vendor/bin/phpcf -t 7.4 genRegenRadar.php config.sample.php ./botLib
+                ./vendor/bin/phpdd -t 7.1 genRegenRadar.php config.sample.php ./botLib
+                ./vendor/bin/phpdd -t 7.2 genRegenRadar.php config.sample.php ./botLib
+                ./vendor/bin/phpdd -t 7.3 genRegenRadar.php config.sample.php ./botLib
+                ./vendor/bin/phpdd -t 7.4 genRegenRadar.php config.sample.php ./botLib
 
     coding-style:
         runs-on: [ubuntu-latest]
