@@ -84,14 +84,14 @@ jobs:
 
             - name: phpmd
               run: |
-                phpmd genRegenRadar.php text cleancode,codesize,controversial,design,naming,unusedcode
-                phpmd botLib/ text cleancode,codesize,controversial,design,naming,unusedcode
+                ./vendor/bin/phpmd genRegenRadar.php text cleancode,codesize,controversial,design,naming,unusedcode
+                ./vendor/bin/phpmd botLib/ text cleancode,codesize,controversial,design,naming,unusedcode
 
             - name: phpcpd
-              run: phpcpd genRegenRadar.php config.sample.php ./botLib
+              run: ./vendor/bin/phpcpd genRegenRadar.php config.sample.php ./botLib
 
             - name: phpcs
-              run: phpcs --report=checkstyle --colors --standard=PSR1 --extensions=php genRegenRadar.php config.sample.php botLib/* | cs2pr
+              run: ./vendor/bin/phpcs --report=checkstyle --colors --standard=PSR1 --extensions=php genRegenRadar.php config.sample.php botLib/* | cs2pr
 
             - name: php-cs-fixer
-              run: php-cs-fixer fix -v --dry-run --format=checkstyle --config=./.php_cs.dist | cs2pr
+              run: ./vendor/bin/php-cs-fixer fix -v --dry-run --format=checkstyle --config=./.php_cs.dist | cs2pr
