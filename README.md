@@ -1,4 +1,5 @@
 ![PHP CI](https://github.com/Blog404DE/RegenRadarVideo/workflows/PHP%20CI/badge.svg) [![GitHub release](https://img.shields.io/github/release/Blog404DE/RegenRadarVideo.svg?style=square)](https://github.com/Blog404DE/RegenRadarVideo) [![license](https://img.shields.io/github/license/Blog404DE/RegenRadarVideo.svg?style=square)](https://github.com/Blog404DE/RegenRadarVideo)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FBlog404DE%2FRegenRadarVideo.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FBlog404DE%2FRegenRadarVideo?ref=badge_shield)
 
 # Regen-Radar Script
 
@@ -142,3 +143,7 @@ Die anzupassenden Konfigurationsparameter in der *config.local.php* lauten wie f
 Copyright Jens Dutzi 2015-2020 / Stand: 20.10.2020 / Dieses Werk ist lizenziert unter einer [MIT Lizenz]
 (http://opensource.org/licenses/mit-license.php)
 
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FBlog404DE%2FRegenRadarVideo.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FBlog404DE%2FRegenRadarVideo?ref=badge_large)
