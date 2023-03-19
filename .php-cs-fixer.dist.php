@@ -13,25 +13,23 @@ EOF;
 $finder = PhpCsFixer\Finder::create()
     ->exclude('Resources')
     ->exclude('dev')
-    ->in([__DIR__, __DIR__.'/botLib'])
-;
+    ->in([__DIR__ . '/', __DIR__ . '/botLib']);
 
-return PhpCsFixer\Config::create()
-    ->setRules([
+$config = new PhpCsFixer\Config();
+$config->setRules([
         '@Symfony' => true,
         '@PSR1' => true,
         '@Symfony:risky' => true,
-        '@PHP56Migration' => true,
-        '@PHP56Migration:risky' => true,
         '@PHP70Migration' => true,
         '@PHP70Migration:risky' => true,
+        '@PHP80Migration' => true,
+        '@PHP80Migration:risky' => true,
         '@PHPUnit60Migration:risky' => true,
         '@PhpCsFixer' => true,
         '@PhpCsFixer:risky' => true,
         'array_syntax' => ['syntax' => 'short'],
         'general_phpdoc_annotation_remove' => [
-            'expectedException',
-            'expectedExceptionMessage',
+            'case_sensitive' => true
         ],
         'header_comment' => ['header' => $header],
         'linebreak_after_opening_tag' => true,
@@ -61,8 +59,9 @@ return PhpCsFixer\Config::create()
              'sort_algorithm' => 'none',
         ],
         'no_superfluous_phpdoc_tags' => false
-    ])
+])
     ->setFinder($finder)
     ->setRiskyAllowed(true)
-    ->setUsingCache(false)
-;
+    ->setUsingCache(true);
+
+return $config;
