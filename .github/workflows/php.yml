@@ -82,4 +82,4 @@ jobs:
               run: ./vendor/bin/phpcs --report=checkstyle --colors --standard=PSR1 --extensions=php genRegenRadar.php config.sample.php botLib/* | cs2pr
 
             - name: php-cs-fixer
-              run: ./vendor/bin/php-cs-fixer fix -v --dry-run --format=checkstyle --config=./.php_cs.dist | cs2pr
+              run: PHP_CS_FIXER_IGNORE_ENV=true ./vendor/bin/php-cs-fixer fix -v --dry-run --format=checkstyle --config=.php-cs-fixer.dist.php | cs2pr
