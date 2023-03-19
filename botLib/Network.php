@@ -15,9 +15,6 @@ declare(strict_types=1);
 
 namespace blog404de\RegenRadar;
 
-use Exception;
-use RuntimeException;
-
 /**
  * Class Network.
  */
@@ -28,7 +25,7 @@ class Network {
      * @param string $localfile
      * @param string $remotefile
      *
-     * @throws Exception
+     * @throws \Exception
      */
     public function downloadFile(string $localfile, string $remotefile): void {
         try {
@@ -37,7 +34,7 @@ class Network {
             // File-Handler öffnen
             $filehandler = fopen($localfile, 'wb+');
             if (!\is_resource($filehandler)) {
-                throw new RuntimeException(
+                throw new \RuntimeException(
                     'Filehandler für ' . $localfile . ' zum speichern des Download konnte nicht geöffnet werden ' .
                     '(URL: ' . basename($remotefile) . ')'
                 );
@@ -45,8 +42,8 @@ class Network {
 
             // Download initialisieren
             $curl = curl_init();
-            if (!\is_resource($curl)) {
-                throw new RuntimeException('Initialisierung von libCurl fehlgeschlagen');
+            if (!$curl instanceof \CurlHandle) {
+                throw new \RuntimeException('Initialisierung von libCurl fehlgeschlagen');
             }
 
             curl_setopt_array(
@@ -57,7 +54,6 @@ class Network {
                     CURLOPT_HEADER => false,
                     CURLOPT_PROGRESSFUNCTION => [$this, 'downloadProgress'],
                     CURLOPT_NOPROGRESS => false,
-                    CURLOPT_BINARYTRANSFER => true,
                     CURLOPT_FOLLOWLOCATION => true,
                     CURLOPT_FILE => $filehandler,
                 ]
@@ -65,14 +61,14 @@ class Network {
 
             // Datei herunterladen
             if (!curl_exec($curl)) {
-                throw new RuntimeException(
+                throw new \RuntimeException(
                     'Verbindung zum DWD-Webserver für die Prüfung des Download ist fehlgeschlagen ' .
                     '(URL: ' . basename($remotefile) . ')'
                 );
             }
 
             echo PHP_EOL . '-> Download abgeschlossen' . PHP_EOL;
-        } catch (RuntimeException | Exception $e) {
+        } catch (\RuntimeException|\Exception $e) {
             // Fehler an Hauptklasse weitergeben
             throw $e;
         }
@@ -84,7 +80,7 @@ class Network {
      * @param string $localfile
      * @param string $remotefile
      *
-     * @throws Exception
+     * @throws \Exception
      *
      * @return bool
      */
@@ -92,8 +88,8 @@ class Network {
         try {
             // Beginne Prüfung über den Zeitstempel des letzten Updates
             $curl = curl_init();
-            if (!\is_resource($curl)) {
-                throw new RuntimeException('Initialisierung von libCurl fehlgeschlagen');
+            if (!$curl instanceof \CurlHandle) {
+                throw new \RuntimeException('Initialisierung von libCurl fehlgeschlagen');
             }
 
             curl_setopt_array(
@@ -110,7 +106,7 @@ class Network {
 
             // Daten erfolgreich ermittelt?
             if (!curl_exec($curl)) {
-                throw new RuntimeException(
+                throw new \RuntimeException(
                     'Verbindung zum DWD-Webserver für die Prüfung des letzten Updates ist fehlgeschlagen ' .
                     '(URL: ' . basename($remotefile) . ')'
                 );
@@ -119,21 +115,21 @@ class Network {
             // Zeitpunkt des letzten Updates ermitteln
             $info = curl_getinfo($curl);
 
-            // Ermittle ob aktualisiert werden muss über den "Last-Modified"-Zeitstempel
+            // Ermittle, ob aktualisiert werden muss über den "Last-Modified"-Zeitstempel
             $updateVideo = $this->updateExists($localfile, $info);
 
             // Schließe Verbindung zum Webserver
             curl_close($curl);
 
             return $updateVideo;
-        } catch (RuntimeException | Exception $e) {
+        } catch (\RuntimeException|\Exception $e) {
             // Fehler an Hauptklasse weitergeben
             throw $e;
         }
     }
 
     /**
-     * Prüfe ob Update für eine bereits heruntergeladene Datei existiert.
+     * Prüfe, ob Update für eine bereits heruntergeladene Datei existiert.
      *
      * @param string $localfile
      * @param array  $info
@@ -150,7 +146,7 @@ class Network {
             // Erzwnge Update
             echo '  -> Upload-Zeitstempel: ' . date('d.m.Y H:i:s', $remotefilemtime) . PHP_EOL;
 
-            // Ermittle Zeitstempel der letzten Datei falls vorhanden
+            // Ermittle Zeitstempel der letzten Datei, falls vorhanden
             if (file_exists($localfile)) {
                 $localfilemtime = filemtime($localfile);
                 echo '  -> Lokale Datei: ' . date('d.m.Y H:i:s', $localfilemtime) . PHP_EOL;
@@ -188,29 +184,22 @@ class Network {
         return $updateVideo;
     }
 
-    /** @noinspection PhpUnusedPrivateMethodInspection */
-
     /**
      * cURL Download Progress darstellen
      * (lubCurl Callback-Funktion).
      *
-     * @param resource $resource
-     * @param int      $downloadSize [optional]
-     * @param int      $downloaded   [optional]
-     * @param int      $uploadSize   [optional]
-     * @param int      $uploaded     [optional]
+     * @param \CurlHandle $resource
+     * @param int         $downloadSize [optional]
+     * @param int         $downloaded   [optional]
      *
      * @SuppressWarnings(PHPMD.UnusedPrivateMethod)
      *
      * @throws
      */
-    private function downloadProgress($resource, int $downloadSize, int $downloaded, int $uploadSize, int $uploaded): void {
+    private function downloadProgress(\CurlHandle $resource, int $downloadSize, int $downloaded): void {
         try {
-            // Ressource vorhanden?
-            if (!\is_resource($resource)) {
-                throw new RuntimeException(
-                    'Interner Fehler: downloadProgress wurde direkt und nicht über libCurl aufgerufen'
-                );
+            if (!$resource instanceof \CurlHandle) {
+                throw new \RuntimeException('downloadProgress wurde nicht über libCurl aufgerufen');
             }
 
             if ($downloadSize > 0) {
@@ -218,14 +207,9 @@ class Network {
                     round($downloaded / 1024) . ' kbyte von ' . round($downloadSize / 1024) . ' kbytes' .
                     ")\r"
                 ;
-            } elseif ($uploadSize > 0) {
-                echo '-> ' . sprintf('%.2f', ($uploaded / $uploadSize) * 100) . '% abgeschlossen (' .
-                    round($uploaded / 1024) . ' kbyte von ' . round($uploadSize / 1024) . ' kbytes' .
-                    ")\r"
-                ;
             }
             flush();
-        } catch (RuntimeException | Exception $e) {
+        } catch (\RuntimeException|\Exception $e) {
             // Fehler an Hauptklasse weitergeben
             throw $e;
         }
