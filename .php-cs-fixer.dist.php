@@ -10,11 +10,15 @@ $header = <<<EOF
  @link       https://github.com/Blog404DE/RegenRadarVideo
 EOF;
 
+/** @noinspection PhpUndefinedClassInspection */
+/** @noinspection PhpUndefinedNamespaceInspection */
 $finder = PhpCsFixer\Finder::create()
     ->exclude('Resources')
     ->exclude('dev')
     ->in([__DIR__ . '/', __DIR__ . '/botLib']);
 
+/** @noinspection PhpUndefinedClassInspection */
+/** @noinspection PhpUndefinedNamespaceInspection */
 $config = new PhpCsFixer\Config();
 $config->setRules([
         '@Symfony' => true,
@@ -42,11 +46,13 @@ $config->setRules([
 		'cast_spaces' => [
             'space' => 'none'
         ],
-		'braces' => [
-			'position_after_control_structures' => 'same',
-			'position_after_functions_and_oop_constructs' => 'same',
-			'position_after_anonymous_constructs' => 'same'
-		],
+        'curly_braces_position' => [
+            'control_structures_opening_brace' => 'same_line',
+            'functions_opening_brace' => 'same_line',
+            'anonymous_functions_opening_brace' => 'same_line',
+            'classes_opening_brace' => 'same_line',
+            'anonymous_classes_opening_brace' => 'same_line',
+        ],
         'backtick_to_shell_exec' => true,
         'mb_str_functions' => true,
         'no_php4_constructor' => true,
