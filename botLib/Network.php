@@ -162,8 +162,7 @@ class Network {
         } elseif (\array_key_exists('download_content_length', $info)) {
             // Wurde Update-Prüfung durchgeführt?
             echo "\t** WARNUNG: Upload-Zeitstempel ist nicht vorhanden " .
-                '(Prüfe auf Veränderung der Dateigröße) ** ' . PHP_EOL
-            ;
+                '(Prüfe auf Veränderung der Dateigröße) ** ' . PHP_EOL;
 
             // Falle zurück auf Prüfung über den Dateinamen
             $remotefilesize = (int)$info['download_content_length'];
@@ -205,8 +204,7 @@ class Network {
             if ($downloadSize > 0) {
                 echo '-> ' . sprintf('%.2f', ($downloaded / $downloadSize) * 100) . '% abgeschlossen (' .
                     round($downloaded / 1024) . ' kbyte von ' . round($downloadSize / 1024) . ' kbytes' .
-                    ")\r"
-                ;
+                    ")\r";
             }
             flush();
         } catch (\RuntimeException|\Exception $e) {
